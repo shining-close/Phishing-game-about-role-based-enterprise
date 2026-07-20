@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}System Login{% endblock %}
+{% block content %}
+<h2>Login to Anti-Phishing Serious Game Platform</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Sign In</button>
+</form>
+{% endblock %}

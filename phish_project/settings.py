@@ -126,3 +126,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+
+# Define the custom user model
+AUTH_USER_MODEL = 'game.UserModel'
+
+# login and redirect URLs for authentication
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/inbox/'

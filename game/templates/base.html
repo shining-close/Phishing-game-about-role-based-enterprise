@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Enterprise Anti-Phishing Training Platform{% endblock %}</title>
+    <style>
+        .container { width: 90%; margin: 30px auto; }
+        nav { background: #222; padding: 12px; color: #fff; }
+        nav a { color: #fff; margin: 0 12px; text-decoration: none; }
+        .mail-card { border: 1px solid #cccccc; padding: 16px; margin: 12px 0; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        {% if active_user %}
+            Welcome, {{ active_user.username }} | Role: {{ active_user.get_role_display }}
+            <a href="{% url 'inbox' %}">My Role-Specific Inbox</a>
+            <a href="{% url 'logout' %}">Sign Out</a>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Register New Account</a>
+        {% endif %}
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

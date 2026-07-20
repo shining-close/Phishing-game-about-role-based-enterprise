@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}{{ active_user.get_role_display }} Exclusive Training Inbox{% endblock %}
+{% block content %}
+<h2>Your Simulated Corporate Mailbox — {{ active_user.get_role_display }} Only Scenarios</h2>
+<hr>
+
+{% if email_dataset %}
+    {% for mail in email_dataset %}
+    <div class="mail-card">
+        <h4>Subject: {{ mail.email_title }}</h4>
+        <p>{{ mail.email_content }}</p>
+        <span>Mail Type:
+            {% if mail.email_label == 'phish' %}
+                <strong style="color:red">Phishing Training Email</strong>
+            {% else %}
+                Normal Legitimate Email
+            {% endif %}
+        </span>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No training email materials available for your department yet.</p>
+{% endif %}
+{% endblock %}

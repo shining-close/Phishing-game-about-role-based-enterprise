@@ -1,0 +1,20 @@
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# local virtual environment
+db.sqlite3
+db.sqlite3-journal
+
+# VScode settings
+.vscode/
+
+# Django stuff:
+static/
+media/
+
+# conda environment
+phishing_game/

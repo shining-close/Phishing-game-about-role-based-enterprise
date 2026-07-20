@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Role-Based Enterprise Phishing Simulation Test{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-top: 100px;">
+    <h1>Welcome to Enterprise Phishing Simulation Training Platform</h1>
+    <h3 style="color: #555; margin-top: 12px;">
+        Gamified anti-phishing test for HR, Finance and IT departments
+    </h3>
+    <hr style="width: 70%; margin: 40px auto;">
+
+    <!-- Dynamic buttons for login/logout status -->
+    <div style="margin-top: 50px;">
+        {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" style="display: inline-block; padding: 12px 30px; background: #0052cc; color: white; text-decoration: none; border-radius: 5px; font-size: 17px; margin: 0 12px;">
+                Register New Trainee Account
+            </a>
+            <a href="{% url 'login' %}" style="display: inline-block; padding: 12px 30px; background: #2d2d2d; color: white; text-decoration: none; border-radius: 5px; font-size: 17px; margin: 0 12px;">
+                Sign In to System
+            </a>
+        {% else %}
+            <p style="font-size: 19px;">Welcome back, {{ user.username }} ({{ user.get_role_display }})</p>
+            <a href="{% url 'inbox' %}" style="display: inline-block; padding: 12px 30px; background: #00875a; color: white; text-decoration: none; border-radius: 5px; font-size: 17px; margin-top: 16px;">
+                Open My Exclusive Training Inbox
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Platform description text -->
+    <div style="margin-top: 80px; color: #666; max-width: 800px; margin-left: auto; margin-right: auto;">
+        <p style="font-size: 16px;">
+            This platform provides role-isolated phishing simulation scenes.
+            Each employee can only view training emails matched to their department:
+            Human Resources, Finance Department, IT Department.
+        </p>
+        <p style="font-size: 16px; margin-top: 10px;">
+            Complete the email judgement game to improve your ability to identify scam emails.
+        </p>
+    </div>
+</div>
+{% endblock %}
