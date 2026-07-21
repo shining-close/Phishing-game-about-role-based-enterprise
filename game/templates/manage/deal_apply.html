@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Audit Application #{{ item.id }}{% endblock %}
+{% block content %}
+<div style="max-width:700px;margin:3rem auto;padding:0 20px;">
+    <h2>Audit Role Change Request</h2>
+    <hr style="margin:20px 0;">
+
+    <div style="font-size:17px;line-height:1.8;">
+        <p><strong>Applicant：</strong>{{ item.user.username }}</p>
+        <p><strong>Current Role：</strong>{{ item.user.get_role_display }}</p>
+        <p><strong>Request Switch To：</strong>{{ item.get_target_role_display }}</p>
+        <p><strong>Submit Time：</strong>{{ item.apply_time }}</p>
+    </div>
+
+    <hr style="margin:24px 0;">
+    <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom:20px;">
+            <label style="display:block;margin-bottom:8px;font-size:17px;">Audit Remark:</label>
+            <textarea name="remark" rows="4" style="width:100%;padding:10px;font-size:16px;" placeholder="Fill in audit reason..."></textarea>
+        </div>
+        <button name="operate" value="approve" type="submit" style="padding:12px 26px;background:#009944;color:white;border:none;border-radius:8px;font-size:16px;">
+            Approve & Update User Role
+        </button>
+        <button name="operate" value="reject" type="submit" style="padding:12px 26px;background:#c00;color:white;border:none;border-radius:8px;font-size:16px;margin-left:12px;">
+            Reject Application
+        </button>
+    </form>
+
+    <a href="{% url 'admin_role_audit' %}" style="display:inline-block;margin-top:24px;color:#165DFF;">← Back Application List</a>
+</div>
+{% endblock %}

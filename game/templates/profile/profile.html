@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Personal Center{% endblock %}
+{% block content %}
+<div style="max-width:720px;margin:4rem auto;padding:0 20px;">
+    <h2>Hello {{ user.username }}</h2>
+    <p style="font-size:18px;color:#444;">Current Role：{{ user.get_role_display }}</p>
+    <hr style="margin:24px 0;">
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+        <a href="{% url 'change_pwd' %}" style="display:block;padding:14px;border:1px solid #165DFF;border-radius:10px;text-decoration:none;color:#165DFF;font-size:17px;">
+            Modify Login Password
+        </a>
+        <a href="{% url 'user_error_record' %}" style="display:block;padding:14px;border:1px solid #165DFF;border-radius:10px;text-decoration:none;color:#165DFF;font-size:17px;">
+            View My Wrong Judgment Records (FN/FP)
+        </a>
+        <a href="{% url 'apply_role' %}" style="display:block;padding:14px;border:1px solid #165DFF;border-radius:10px;text-decoration:none;color:#165DFF;font-size:17px;">
+            Submit Role Change Application
+        </a>
+    </div>
+
+    {% if user.role == "admin" %}
+    <hr style="margin:32px 0;border-color:#009944;">
+    <h3 style="color:#007a29;">Admin Exclusive Functions</h3>
+    <div style="display:flex;flex-direction:column;gap:16px;margin-top:16px;">
+        <a href="{% url 'admin_role_audit' %}" style="display:block;padding:14px;border:1px solid #009944;border-radius:10px;text-decoration:none;color:#009944;font-size:17px;">
+            Audit All Role Change Applications
+        </a>
+        <!-- 拆分后的两个独立页面 -->
+        <a href="{% url 'admin_all_user_list' %}" style="display:block;padding:14px;border:1px solid #009944;border-radius:10px;text-decoration:none;color:#009944;font-size:17px;">
+            View All User Accounts (Paginated)
+        </a>
+        <a href="{% url 'admin_all_game_logs' %}" style="display:block;padding:14px;border:1px solid #009944;border-radius:10px;text-decoration:none;color:#009944;font-size:17px;">
+            View All Training Judgement Logs (Paginated)
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

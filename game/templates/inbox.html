@@ -1,24 +1,64 @@
 {% extends 'base.html' %}
 {% block title %}{{ active_user.get_role_display }} Exclusive Training Inbox{% endblock %}
+
 {% block content %}
-<h2>Your Simulated Corporate Mailbox — {{ active_user.get_role_display }} Only Scenarios</h2>
+<h2>Corporate Anti-Phishing Training — {{ active_user.get_role_display }} Department Scenarios</h2>
 <hr>
 
-{% if email_dataset %}
-    {% for mail in email_dataset %}
-    <div class="mail-card">
-        <h4>Subject: {{ mail.email_title }}</h4>
-        <p>{{ mail.email_content }}</p>
-        <span>Mail Type:
-            {% if mail.email_label == 'phish' %}
-                <strong style="color:red">Phishing Training Email</strong>
-            {% else %}
-                Normal Legitimate Email
-            {% endif %}
-        </span>
-    </div>
-    {% endfor %}
-{% else %}
-    <p>No training email materials available for your department yet.</p>
+{% if active_user.role == "hr" %}
+    <h3>👤 HR Exclusive Training Library</h3>
+    <h4>Level 1 Basic Binary Judgement</h4>
+    <ul>
+        <li><a href="{% url 'hr_l1_1' %}">Fake Recruitment CV Attachment</a></li>
+        <li><a href="{% url 'hr_l1_2' %}">False Welfare Benefit Login Page</a></li>
+    </ul>
+    <h4>Level 2 Intermediate Classification</h4>
+    <ul>
+        <li><a href="{% url 'hr_l2_1' %}">Payroll Information Modification Scam</a></li>
+        <li><a href="{% url 'hr_l2_2' %}">Fake Staff Compliance Notice</a></li>
+    </ul>
+    <h4>Level 3 Advanced Feature Spotting</h4>
+    <ul>
+        <li><a href="{% url 'hr_l3_1' %}">Spear Phishing from Fake Executive HR</a></li>
+        <li><a href="{% url 'hr_l3_2' %}">Malicious Onboarding Document</a></li>
+    </ul>
+
+{% elif active_user.role == "finance" %}
+    <h3>💰 Finance Exclusive Training Library</h3>
+    <h4>Level 1 Basic Binary Judgement</h4>
+    <ul>
+        <li><a href="{% url 'fin_l1_1' %}">Fake Supplier Invoice Mail</a></li>
+        <li><a href="{% url 'fin_l1_2' %}">Urgent Payment Request</a></li>
+    </ul>
+    <h4>Level 2 Intermediate Classification</h4>
+    <ul>
+        <li><a href="{% url 'fin_l2_1' %}">Counterfeit VAT Document Attachment</a></li>
+        <li><a href="{% url 'fin_l2_2' %}">Fake Audit Notification</a></li>
+    </ul>
+    <h4>Level 3 Advanced Feature Spotting</h4>
+    <ul>
+        <li><a href="{% url 'fin_l3_1' %}">CEO Impersonation Transfer Fraud</a></li>
+        <li><a href="{% url 'fin_l3_2' %}">Fraudulent Bank Account Change Notice</a></li>
+    </ul>
+
+{% elif active_user.role == "it" %}
+    <h3>💻 IT Exclusive Training Library</h3>
+    <h4>Level 1 Basic Binary Judgement</h4>
+    <ul>
+        <li><a href="{% url 'it_l1_1' %}">Fake MFA Reset Alert</a></li>
+        <li><a href="{% url 'it_l1_2' %}">Pseudo System Maintenance Mail</a></li>
+    </ul>
+    <h4>Level 2 Intermediate Classification</h4>
+    <ul>
+        <li><a href="{% url 'it_l2_1' %}">Fake Service Desk Ticket</a></li>
+        <li><a href="{% url 'it_l2_2' %}">Third-Party Software Upgrade Trojan</a></li>
+    </ul>
+    <h4>Level 3 Advanced Feature Spotting</h4>
+    <ul>
+        <li><a href="{% url 'it_l3_1' %}">Domain Spoofed Admin Notice</a></li>
+        <li><a href="{% url 'it_l3_2' %}">Supply Chain Vendor Backdoor Link</a></li>
+    </ul>
 {% endif %}
+
+<p style="color:#666;">All operation records will be saved to MySQL for post-training blind spot analysis.</p>
 {% endblock %}

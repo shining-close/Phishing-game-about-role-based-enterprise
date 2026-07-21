@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Role Change Audit List (Admin){% endblock %}
+{% block content %}
+<div style="max-width:1400px;margin:2rem auto;padding:0 16px;">
+    <h2>All User Role Change Applications</h2>
+    <hr style="margin:16px 0;">
+
+    <table border="1" cellpadding="12" style="width:100%;border-collapse:collapse;">
+        <tr style="background:#f0f8ff;">
+            <th>Applicant Username</th>
+            <th>Current Role</th>
+            <th>Apply Target Role</th>
+            <th>Submit Time</th>
+            <th>Status</th>
+            <th>Audit Operator</th>
+            <th>Operation</th>
+        </tr>
+        {% for item in apply_list %}
+        <tr>
+            <td>{{ item.user.username }}</td>
+            <td>{{ item.user.get_role_display }}</td>
+            <td>{{ item.get_target_role_display }}</td>
+            <td>{{ item.apply_time }}</td>
+            <td>
+                {% if item.status == "pending" %}
+                <span style="color:#c77000;">Pending Review</span>
+                {% elif item.status == "approved" %}
+                <span style="color:#009944;">Approved</span>
+                {% else %}
+                <span style="color:#c00;">Rejected</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if item.audit_admin %}
+                {{ item.audit_admin.username }}
+                {% else %}
+                --
+                {% endif %}
+            </td>
+            <td>
+                {% if item.status == "pending" %}
+                <a href="{% url 'deal_role_apply' item.id %}" style="color:#165DFF;">Process Audit</a>
+                {% else %}
+                Remark：{{ item.admin_remark|default:"--" }}
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <a href="{% url 'profile' %}" style="display:inline-block;margin-top:28px;color:#007a29;">← Back Admin Panel</a>
+</div>
+{% endblock %}

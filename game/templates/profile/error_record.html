@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}My Wrong Judgement Records{% endblock %}
+{% block content %}
+<div style="max-width:1400px;margin:2rem auto;padding:0 16px;">
+    <h2>My Error Training Records</h2>
+    <p style="color:#666;">Only show FN (Miss Phishing) & FP (False Alarm) records, same question only display once.</p>
+    <hr style="margin:16px 0;">
+
+    {% if page.object_list %}
+    <table border="1" cellpadding="12" style="width:100%;border-collapse:collapse;">
+        <tr style="background:#f5f7fa;">
+            <th>Email Title</th>
+            <th>Department</th>
+            <th>Judge Result</th>
+            <th>Confidence Score</th>
+            <th>Scam Feature</th>
+        </tr>
+        {% for item in page.object_list %}
+        <tr>
+            <td>{{ item.target_email.email_title }}</td>
+            <td>{{ item.target_email.get_department_display }}</td>
+            <td>
+                {% if item.judge_result == "FN" %}
+                <span style="color:#c00;font-weight:bold;">FN Miss Phish</span>
+                {% else %}
+                <span style="color:#c77000;font-weight:bold;">FP False Alarm</span>
+                {% endif %}
+            </td>
+            <td>{{ item.confidence_score }} / 5</td>
+            <td style="max-width:420px;word-break:break-all;font-size:14px;">
+                {{ item.target_email.fraud_feature_description }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- 分页导航 -->
+    <div style="display:flex;gap:16px;align-items:center;margin:24px 0;">
+        {% if page.has_previous %}
+            <a href="?page={{ page.previous_page_number }}" style="padding:6px 12px;border:1px solid #165DFF;color:#165DFF;text-decoration:none;">Previous Page</a>
+        {% endif %}
+        <span>Page {{ page.number }} / {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}
+            <a href="?page={{ page.next_page_number }}" style="padding:6px 12px;border:1px solid #165DFF;color:#165DFF;text-decoration:none;">Next Page</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <p style="font-size:18px;color:#333;text-align:center;margin:60px 0;">You have no wrong judgement records!</p>
+    {% endif %}
+
+    <a href="{% url 'profile' %}" style="display:inline-block;margin-top:10px;color:#165DFF;font-size:16px;">← Back to Personal Center</a>
+</div>
+{% endblock %}

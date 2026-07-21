@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Apply Role Change{% endblock %}
+{% block content %}
+<div style="max-width:620px;margin:4rem auto;padding:0 20px;">
+    <h2>Submit Department Role Change Application</h2>
+    <p style="color:#666;">After submission, admin needs manual approval before your role changes</p>
+    <hr style="margin:20px 0;">
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="margin:24px 0;">
+            <label style="display:block;margin-bottom:8px;font-size:17px;">Select Target Role:</label>
+            <select name="target_role" style="width:100%;padding:11px;font-size:16px;border:1px solid #ccc;border-radius:6px;">
+                {% for val, name in role_choices %}
+                <option value="{{ val }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" style="padding:12px 32px;background:#165DFF;color:white;border:none;border-radius:8px;font-size:16px;">
+            Submit Application
+        </button>
+        <a href="{% url 'profile' %}" style="margin-left:18px;color:#165DFF;">Cancel & Return</a>
+    </form>
+</div>
+{% endblock %}
