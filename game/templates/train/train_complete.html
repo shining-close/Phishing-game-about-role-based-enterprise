@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="text-align:center;margin-top:100px;">
+    <h2 style="color:#009944;">You have finished all 5 training questions!</h2>
+    <p style="margin:20px 0;">Your judgment records have been saved to your error training records.</p>
+    <div style="display:flex;gap:20px;justify-content:center;">
+        <a href="{% url 'train_l1' %}">Re-do Level 1 Training</a>
+        <a href="{% url 'profile' %}">View My Error Records</a>
+    </div>
+</div>
+{% endblock %}

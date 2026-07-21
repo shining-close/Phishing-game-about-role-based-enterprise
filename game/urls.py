@@ -8,6 +8,17 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     path("inbox/", views.inbox_view, name="inbox"),
 
+        # L1 训练入口
+    path("train/l1/", views.train_level1_view, name="train_l1"),
+    # L2 训练入口（复制L1逻辑，仅修改difficulty_level=2）
+    path("train/l2/", views.train_level2_view, name="train_l2"),
+    # L3 训练入口
+    path("train/l3/", views.train_level3_view, name="train_l3"),
+    # 通用答题页面（携带难度、模板ID）
+    path("train/<int:level>/question/<int:tpl_id>/", views.train_question, name="train_question"),
+    # 5题全部完成后的结束页面
+    path("train/complete/", views.train_complete, name="train_complete"),
+
     # Game submission log interface
     path("game/submit/", views.submit_game_record, name="submit_record"),
 
@@ -23,27 +34,5 @@ urlpatterns = [
     path("manage/all-game-logs/", views.admin_all_game_logs, name="admin_all_game_logs"),
 
 
-        # ========== HR three ==========
-    path("train/hr/l1/1/", views.hr_l1_1, name="hr_l1_1"),
-    path("train/hr/l1/2/", views.hr_l1_2, name="hr_l1_2"),
-    path("train/hr/l2/1/", views.hr_l2_1, name="hr_l2_1"),
-    path("train/hr/l2/2/", views.hr_l2_2, name="hr_l2_2"),
-    path("train/hr/l3/1/", views.hr_l3_1, name="hr_l3_1"),
-    path("train/hr/l3/2/", views.hr_l3_2, name="hr_l3_2"),
 
-    # ========== Finance ==========
-    path("train/fin/l1/1/", views.fin_l1_1, name="fin_l1_1"),
-    path("train/fin/l1/2/", views.fin_l1_2, name="fin_l1_2"),
-    path("train/fin/l2/1/", views.fin_l2_1, name="fin_l2_1"),
-    path("train/fin/l2/2/", views.fin_l2_2, name="fin_l2_2"),
-    path("train/fin/l3/1/", views.fin_l3_1, name="fin_l3_1"),
-    path("train/fin/l3/2/", views.fin_l3_2, name="fin_l3_2"),
-
-    # ========== IT ==========
-    path("train/it/l1/1/", views.it_l1_1, name="it_l1_1"),
-    path("train/it/l1/2/", views.it_l1_2, name="it_l1_2"),
-    path("train/it/l2/1/", views.it_l2_1, name="it_l2_1"),
-    path("train/it/l2/2/", views.it_l2_2, name="it_l2_2"),
-    path("train/it/l3/1/", views.it_l3_1, name="it_l3_1"),
-    path("train/it/l3/2/", views.it_l3_2, name="it_l3_2"),
 ]

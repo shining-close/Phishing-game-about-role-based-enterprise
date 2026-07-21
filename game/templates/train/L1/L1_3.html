@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+{% block title %}Level {{ level }} | Template {{ template.template_serial }} Training{% endblock %}
+{% block content %}
+<style>
+/* 全局基础样式 */
+body {
+    background: #f5f7fa;
+}
+.wrap {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 16px;
+}
+/* 顶部题号+判断按钮 */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+.progress-text {
+    font-size: 20px;
+    font-weight: bold;
+    color: #165DFF;
+}
+.btn-judge {
+    padding: 12px 26px;
+    border-radius: 999px;
+    border: none;
+    font-size: 16px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+.btn-phish {
+    background: #165DFF;
+    color: white;
+}
+.btn-normal {
+    background: #fff;
+    color: #165DFF;
+    border: 1px solid #165DFF !important;
+}
+
+/* 手机短信外壳 */
+.phone-shell {
+    width: 420px;
+    margin: 0 auto;
+    border: 12px solid #333;
+    border-radius: 28px;
+    background: #ffffff;
+    overflow: visible;
+}
+/* 手机顶部状态栏 */
+.phone-status {
+    background: #eee;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+}
+.back-icon {
+    font-size: 22px;
+    opacity: 0.6;
+}
+.sender-name {
+    margin-left: 12px;
+    font-size: 20px;
+}
+/* 短信内容区域 */
+.sms-container {
+    padding: 20px;
+}
+.send-time {
+    color: #888;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+/* 短信气泡 */
+.sms-bubble {
+    background: #e9e9eb;
+    border-radius: 14px 14px 14px 6px;
+    padding: 16px;
+    max-width: 92%;
+    overflow: visible !important;
+    font-size: 17px;
+    line-height: 1.6;
+}
+/* 链接容器 */
+.link-box {
+    width: 320px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 18px 0;
+    position: relative;
+    overflow: visible !important;
+}
+.doc-icon {
+    width: 80px;
+    height: 80px;
+    background: #3b82f6;
+    margin: 10px auto;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 40px;
+}
+/* 文字链接悬浮提示 */
+.fake-link {
+    color: #165DFF;
+    cursor: default;
+    position: relative;
+    display: inline-block;
+    overflow: visible !important;
+}
+.fake-link .link-tip {
+    display: none;
+    position: absolute;
+    bottom: 130%;
+    left: 0;
+    background: #222;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: nowrap;
+    z-index: 99999;
+}
+.fake-link:hover .link-tip {
+    display: block;
+}
+/* 打开按钮悬浮气泡 */
+.open-btn {
+    margin-top: 15px;
+    padding: 10px 22px;
+    background: #165DFF;
+    color: white;
+    border: none;
+    border-radius: 999px;
+    font-size: 15px;
+    cursor: default;
+    position: relative;
+    overflow: visible !important;
+}
+.open-btn::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 130%;
+    left: 0;
+    background: #222;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.2s ease;
+    z-index: 99999;
+}
+.open-btn:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+/* 置信度输入 */
+.conf-box {
+    margin: 40px auto;
+    width: 420px;
+    font-size: 18px;
+}
+.conf-box input {
+    padding:8px;font-size:16px;width:100px;margin-left:10px;
+}
+/* 结果弹窗 */
+.result-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    z-index: 999;
+}
+.modal-inner {
+    width: 900px;
+    background: white;
+    margin: 100px auto;
+    padding: 40px;
+    border-radius: 12px;
+}
+.correct-title {
+    color: #009944;
+    font-size: 32px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+.wrong-title {
+    color: #dd3333;
+    font-size: 32px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+.desc-text {
+    font-size: 17px;
+    line-height: 1.8;
+    color: #333;
+    margin-bottom: 30px;
+}
+.next-btn {
+    padding: 12px 30px;
+    background: #165DFF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+</style>
+
+<div class="wrap">
+    <!-- 顶部题号+判断按钮 -->
+    <div class="top-bar">
+        <div class="progress-text">{{ current_num }} / {{ total_count }} Questions</div>
+        <div class="top-btns">
+            <button class="btn-judge btn-phish" onclick="submitJudge('phish')">Phishing Attack</button>
+            <button class="btn-judge btn-normal" onclick="submitJudge('legit')">Legitimate</button>
+        </div>
+    </div>
+
+    <!-- 手机短信模拟框 -->
+    <div class="phone-shell">
+        <!-- 手机顶部发件人栏 -->
+        <div class="phone-status">
+            <span class="back-icon">&lt;</span>
+            <span class="sender-name">{{ template.email_title }}</span>
+        </div>
+        <!-- 短信内容区域 -->
+        <div class="sms-container">
+            <div class="send-time">04:29</div>
+            <div class="sms-bubble">
+                {{ template.email_content|linebreaks }}
+
+                <div class="link-box">
+                    <div style="font-weight:500;">Shared Documents / Secure Links</div>
+                    <p>Click the link below for details</p>
+                    <div class="doc-icon">🔗</div>
+                    <!-- 动态钓鱼链接 悬浮气泡读取数据库链接 -->
+                    <span class="fake-link">
+                        {{ template.fake_link }}
+                        <span class="link-tip">{{ template.fake_link }}</span>
+                    </span>
+                    <br>
+                    <button class="open-btn" data-tip="{{ template.fake_link }}">Open Link</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 置信度输入框 -->
+    <div class="conf-box">
+        <label>Confidence (1-5):</label>
+        <input type="number" id="conf_score" min="1" max="5" value="3" required>
+    </div>
+</div>
+
+<!-- 判断结果弹窗 -->
+<div class="result-modal" id="modal">
+    <div class="modal-inner">
+        <h2 id="modal-title"></h2>
+        <p class="desc-text" id="modal-text"></p>
+        <button class="next-btn" onclick="goNext()">Next question</button>
+    </div>
+</div>
+
+<!-- 隐藏提交表单 -->
+<form id="judge-form" action="{% url 'train_question' level=level tpl_id=template.id %}" method="POST" hidden>
+    {% csrf_token %}
+    <input type="hidden" name="judge_result" id="input-judge">
+    <input type="hidden" name="conf_score" id="input-conf">
+</form>
+
+<script>
+const modal = document.getElementById('modal');
+const titleDom = document.getElementById('modal-title');
+const textDom = document.getElementById('modal-text');
+const form = document.getElementById('judge-form');
+const inputJudge = document.getElementById('input-judge');
+const confInput = document.getElementById('conf_score');
+// 后端真实标签
+const realLabel = "{{ template.email_label }}";
+// 诈骗特征解释（数据库诈骗描述）
+const scamDesc = `{{ template.fraud_feature_description }}`;
+function submitJudge(userChoice){
+    // 读取置信度
+    let conf = confInput.value || 3;
+    document.getElementById('input-conf').value = conf;
+    inputJudge.value = userChoice;
+    modal.style.display = "block";
+    // 对比用户选择与真实标签
+    if(userChoice === realLabel){
+        titleDom.innerText = "✅ Correct judgment";
+        titleDom.className = "correct-title";
+        textDom.innerText = `Analysis: ${scamDesc}`;
+    }else{
+        titleDom.innerText = "❌ Wrong judgment";
+        titleDom.className = "wrong-title";
+        if(realLabel === "phish"){
+            textDom.innerText = `This is a phishing email, risk description: ${scamDesc}`;
+        }else{
+            textDom.innerText = `This is a legitimate official email, no phishing risk: ${scamDesc}`;
+        }
+    }
+}
+// 点击下一题提交表单跳转
+function goNext(){
+    form.submit();
+}
+</script>
+{% endblock %}

@@ -1,64 +1,26 @@
-{% extends 'base.html' %}
-{% block title %}{{ active_user.get_role_display }} Exclusive Training Inbox{% endblock %}
-
+{% extends "base.html" %}
+{% block title %}Inbox - Mail Training Center{% endblock %}
 {% block content %}
-<h2>Corporate Anti-Phishing Training — {{ active_user.get_role_display }} Department Scenarios</h2>
-<hr>
+<div style="max-width:1200px;margin:2rem auto;padding:0 16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd;padding-bottom:16px;margin-bottom:24px;">
+        <h1>Mail Inbox</h1>
+        <div style="display:flex;gap:12px;">
+            <!-- 训练入口：使用urls内合法别名 train_l1 / train_l2 / train_l3 -->
+            <a href="{% url 'train_l1' %}" style="padding:8px 16px;background:#165DFF;color:white;border-radius:6px;text-decoration:none;">Level 1 Basic Training</a>
+            <a href="{% url 'train_l2' %}" style="padding:8px 16px;border:1px solid #165DFF;color:#165DFF;border-radius:6px;text-decoration:none;">Level 2 Intermediate Training</a>
+            <a href="{% url 'train_l3' %}" style="padding:8px 16px;border:1px solid #165DFF;color:#165DFF;border-radius:6px;text-decoration:none;">Level 3 Advanced Training</a>
+        </div>
+    </div>
 
-{% if active_user.role == "hr" %}
-    <h3>👤 HR Exclusive Training Library</h3>
-    <h4>Level 1 Basic Binary Judgement</h4>
-    <ul>
-        <li><a href="{% url 'hr_l1_1' %}">Fake Recruitment CV Attachment</a></li>
-        <li><a href="{% url 'hr_l1_2' %}">False Welfare Benefit Login Page</a></li>
-    </ul>
-    <h4>Level 2 Intermediate Classification</h4>
-    <ul>
-        <li><a href="{% url 'hr_l2_1' %}">Payroll Information Modification Scam</a></li>
-        <li><a href="{% url 'hr_l2_2' %}">Fake Staff Compliance Notice</a></li>
-    </ul>
-    <h4>Level 3 Advanced Feature Spotting</h4>
-    <ul>
-        <li><a href="{% url 'hr_l3_1' %}">Spear Phishing from Fake Executive HR</a></li>
-        <li><a href="{% url 'hr_l3_2' %}">Malicious Onboarding Document</a></li>
-    </ul>
+    <!-- 收件箱空白提示 -->
+    <div style="text-align:center;padding:80px 0;color:#666;font-size:18px;">
+        <p>Your inbox has no new mails temporarily.</p>
+        <p style="margin-top:12px;">Click the buttons above to start phishing identification training practice.</p>
+    </div>
 
-{% elif active_user.role == "finance" %}
-    <h3>💰 Finance Exclusive Training Library</h3>
-    <h4>Level 1 Basic Binary Judgement</h4>
-    <ul>
-        <li><a href="{% url 'fin_l1_1' %}">Fake Supplier Invoice Mail</a></li>
-        <li><a href="{% url 'fin_l1_2' %}">Urgent Payment Request</a></li>
-    </ul>
-    <h4>Level 2 Intermediate Classification</h4>
-    <ul>
-        <li><a href="{% url 'fin_l2_1' %}">Counterfeit VAT Document Attachment</a></li>
-        <li><a href="{% url 'fin_l2_2' %}">Fake Audit Notification</a></li>
-    </ul>
-    <h4>Level 3 Advanced Feature Spotting</h4>
-    <ul>
-        <li><a href="{% url 'fin_l3_1' %}">CEO Impersonation Transfer Fraud</a></li>
-        <li><a href="{% url 'fin_l3_2' %}">Fraudulent Bank Account Change Notice</a></li>
-    </ul>
-
-{% elif active_user.role == "it" %}
-    <h3>💻 IT Exclusive Training Library</h3>
-    <h4>Level 1 Basic Binary Judgement</h4>
-    <ul>
-        <li><a href="{% url 'it_l1_1' %}">Fake MFA Reset Alert</a></li>
-        <li><a href="{% url 'it_l1_2' %}">Pseudo System Maintenance Mail</a></li>
-    </ul>
-    <h4>Level 2 Intermediate Classification</h4>
-    <ul>
-        <li><a href="{% url 'it_l2_1' %}">Fake Service Desk Ticket</a></li>
-        <li><a href="{% url 'it_l2_2' %}">Third-Party Software Upgrade Trojan</a></li>
-    </ul>
-    <h4>Level 3 Advanced Feature Spotting</h4>
-    <ul>
-        <li><a href="{% url 'it_l3_1' %}">Domain Spoofed Admin Notice</a></li>
-        <li><a href="{% url 'it_l3_2' %}">Supply Chain Vendor Backdoor Link</a></li>
-    </ul>
-{% endif %}
-
-<p style="color:#666;">All operation records will be saved to MySQL for post-training blind spot analysis.</p>
+    <!-- 底部导航 -->
+    <div style="margin-top:60px;text-align:center;">
+        <a href="{% url 'profile' %}" style="color:#165DFF;">← Back to Personal Center</a>
+    </div>
+</div>
 {% endblock %}

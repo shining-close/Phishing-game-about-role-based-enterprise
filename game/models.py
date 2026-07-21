@@ -38,52 +38,71 @@ class UserModel(AbstractUser):
 
 # 2. EmailTemplateModel: store labelled legitimate / phishing emails filtered by department
 class EmailTemplateModel(models.Model):
-    # Label to distinguish normal mail and scam mail
+    # 邮件分类：正常/钓鱼
     EMAIL_CATEGORY = (
         ('legit', 'Legitimate Email'),
         ('phish', 'Phishing Email'),
     )
-    # Match department tags with user role for access isolation
+
+    # 部门权限隔离：hr / finance / it
     DEPARTMENT_TAGS = (
         ('hr', 'HR'),
         ('finance', 'Finance'),
         ('it', 'IT'),
     )
 
+    # 难度分级 L1/L2/L3
     DIFFICULTY_CHOICES = (
         (1, "Level 1 Basic"),
         (2, "Level 2 Intermediate"),
         (3, "Level 3 Advanced"),
     )
+
+    # 同难度下5套独立模板序号 1~5，对应 L1_1.html ~ L1_5.html
+    TEMPLATE_SERIAL_CHOICES = (
+        (1, "Template No.1"),
+        (2, "Template No.2"),
+        (3, "Template No.3"),
+        (4, "Template No.4"),
+        (5, "Template No.5"),
+    )
+
+    # 基础邮件字段（和你之前表单完全对应）
     email_title = models.CharField(max_length=200, verbose_name="Email Subject")
     email_content = models.TextField(verbose_name="Email Body Text")
     fake_link = models.CharField(max_length=300, blank=True, verbose_name="Phishing Fake URL")
-
     difficulty_level = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1, verbose_name="Difficulty Level")
-    email_label = models.CharField(max_length=10, choices=EMAIL_CATEGORY)
+    email_label = models.CharField(max_length=10, choices=EMAIL_CATEGORY, verbose_name="Email label")
     department = models.CharField(max_length=20, choices=DEPARTMENT_TAGS, verbose_name="Target Department")
     fraud_feature_description = models.TextField(blank=True, verbose_name="Deceptive scam features")
-    created_at = models.DateTimeField(auto_now_add=True)
     risk_keywords = models.CharField(max_length=500, blank=True, verbose_name="Risk Keywords (split by comma)")
 
+    # 核心关联字段：匹配 html 文件后缀 L{level}_{serial}.html
+    template_serial = models.IntegerField(
+        choices=TEMPLATE_SERIAL_CHOICES,
+        verbose_name="Template Serial No.(1-5, match Lx_x.html)",
+        default=1 
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        return f"[{self.get_department_display()}] L{self.difficulty_level} {self.email_title}"
+        """后台列表清晰展示：部门-难度-模板号-邮件标题"""
+        return f"[{self.get_department_display()}] L{self.difficulty_level} T{self.template_serial} | {self.email_title}"
+    
+    class Meta:
+        verbose_name = "Training Email Template"
+        verbose_name_plural = "Training Email Templates"
 
 # 3. GameRecordModel: log all user interaction data for later quantitative analysis (RQ3)
 class GameRecordModel(models.Model):
-    # Four classification results for user email judgement
     JUDGEMENT_OUTCOME = (
-        ('TP', 'True Positive: Correctly identify phish'),
-        ('TN', 'True Negative: Correctly identify normal mail'),
-        ('FP', 'False Positive: Misjudge legit mail as phish'),
-        ('FN', 'False Negative: Miss phishing email (critical risk)'),
+        ('right', 'Correct judgment'),
+        ('wrong', 'Wrong judgment'),
     )
-    # Foreign key link to trainee user
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
-    # Foreign key link to email template being judged
     target_email = models.ForeignKey(EmailTemplateModel, on_delete=models.CASCADE)
-    judge_result = models.CharField(max_length=2, choices=JUDGEMENT_OUTCOME)
-    # User self-reported confidence score (1 ~ 5 scale)
+    judge_result = models.CharField(max_length=5, choices=JUDGEMENT_OUTCOME)
     confidence_score = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
     operation_timestamp = models.DateTimeField(auto_now_add=True)
     scam_type_tag = models.CharField(max_length=50, blank=True)

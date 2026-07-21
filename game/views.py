@@ -7,7 +7,7 @@ from .forms import RegisterForm, LoginForm
 from .models import EmailTemplateModel, GameRecordModel
 from django.core.paginator import Paginator
 from django.db.models import Max
-
+import random
 # Difine a decorator to restrict access to views based on user role
 def role_permit(allow_role):
     def decorator(view_func):
@@ -71,121 +71,140 @@ def home_view(request):
     """Home page with English welcome text for phishing simulation test"""
     return render(request, "home.html")
 
-# ====================== New:HR ======================
+# ====================== Train ======================
+# For Level 1
 @login_required
-@role_permit("hr")
-def hr_l1_1(request):
-    email = get_object_or_404(
-        EmailTemplateModel,
-        department="hr",
-        difficulty_level=1
-    )
+def train_level1_view(request):
+    user_dept = request.user.role
+    train_question_list = []
+    # 遍历5个模板序号 1~5
+    for serial_num in [1,2,3,4,5]:
+        # 不再限制 phish，phish+legit 全部查询出来
+        serial_all_mail = EmailTemplateModel.objects.filter(
+            department=user_dept,
+            difficulty_level=1,
+            template_serial=serial_num
+        )
+        mail_list = list(serial_all_mail)
+        # 校验：该序号至少要有1封邮件（钓鱼/正常都行）
+        if len(mail_list) == 0:
+            msg = f"L1 模板序号{serial_num}未录入任何邮件(钓鱼/正常均可)，请管理员补充题库"
+            return render(request, "train/error_tip.html", {"msg": msg})
+        # 该序号下随机抽1封（可能是钓鱼、也可能是正常邮件）
+        pick_one = random.choice(mail_list)
+        train_question_list.append(pick_one)
 
-    return render(request, "train/hr/l1_1.html", {"email": email})
-
-@login_required
-@role_permit("hr")
-def hr_l1_2(request):
-    email = get_object_or_404(EmailTemplateModel, id=2, department="hr")
-    return render(request, "train/hr/l1_2.html", {"email": email})
-
-@login_required
-@role_permit("hr")
-def hr_l2_1(request):
-    email = get_object_or_404(EmailTemplateModel, id=3, department="hr")
-    return render(request, "train/hr/l2_1.html", {"email": email})
-
-@login_required
-@role_permit("hr")
-def hr_l2_2(request):
-    email = get_object_or_404(EmailTemplateModel, id=4, department="hr")
-    return render(request, "train/hr/l2_2.html", {"email": email})
-
-@login_required
-@role_permit("hr")
-def hr_l3_1(request):
-    email = get_object_or_404(EmailTemplateModel, id=5, department="hr")
-    return render(request, "train/hr/l3_1.html", {"email": email})
+    # 打乱5道题整体顺序
+    random.shuffle(train_question_list)
+    request.session["train_queue"] = [obj.id for obj in train_question_list]
+    request.session["train_idx"] = 0
+    return redirect("train_question", tpl_id=train_question_list[0].id, level=1)
 
 @login_required
-@role_permit("hr")
-def hr_l3_2(request):
-    email = get_object_or_404(EmailTemplateModel, id=6, department="hr")
-    return render(request, "train/hr/l3_2.html", {"email": email})
+def train_question(request, level, tpl_id):
+    from .models import EmailTemplateModel, GameRecordModel
+    train_queue = request.session.get("train_queue", [])
+    current_idx = request.session.get("train_idx", 0)
+    user_dept = request.user.role
+    # 会话合法性校验：只能按队列顺序访问题目
+    if not train_queue or current_idx >= len(train_queue) or train_queue[current_idx] != tpl_id:
+        return redirect(f"train_l{level}")
+    try:
+        # 仅校验部门、难度，不限制邮件类型（钓鱼/正常都参与训练）
+        tpl = EmailTemplateModel.objects.get(
+            id=tpl_id,
+            department=user_dept,
+            difficulty_level=level
+        )
+    except EmailTemplateModel.DoesNotExist:
+        # 模板不属于当前用户/不存在，打回训练首页
+        return redirect(f"train_l{level}")
+    # 拼接对应页面路径 train/Lx/Lx_x.html
+    template_file = f"train/L{level}/L{level}_{tpl.template_serial}.html"
+    if request.method == "POST":
+        # 读取用户前端点击的判断选项 phish / legit
+        user_choice = request.POST.get("judge_result")
+        # 读取置信度
+        conf_score = int(request.POST.get("conf_score", 3))
+        # 限制分数 1~5
+        conf_score = max(1, min(5, conf_score))
 
-# ===================== Finance 游戏视图 role="finance" =====================
-@login_required
-@role_permit("finance")
-def fin_l1_1(request):
-    email = get_object_or_404(EmailTemplateModel, id=7, department="finance")
-    return render(request, "train/finance/l1_1.html", {"email": email})
+        # 对比用户选择与真实标签，二分标记 right / wrong
+        if user_choice == tpl.email_label:
+            auto_judge = "right"
+        else:
+            auto_judge = "wrong"
 
-@login_required
-@role_permit("finance")
-def fin_l1_2(request):
-    email = get_object_or_404(EmailTemplateModel, id=8, department="finance")
-    return render(request, "train/finance/l1_2.html", {"email": email})
+        # 保存作答记录
+        GameRecordModel.objects.create(
+            user=request.user,
+            target_email=tpl,
+            judge_result=auto_judge,
+            confidence_score=conf_score
+        )
+        # 题号+1
+        request.session["train_idx"] = current_idx + 1
+        next_idx = current_idx + 1
+        # 5题全部完成，清空会话跳转完成页
+        if next_idx >= len(train_queue):
+            if "train_queue" in request.session:
+                del request.session["train_queue"]
+            if "train_idx" in request.session:
+                del request.session["train_idx"]
+            return redirect("train_complete")
+        # 跳转下一题
+        next_tpl_id = train_queue[next_idx]
+        return redirect("train_question", level=level, tpl_id=next_tpl_id)
+    # GET 请求：渲染页面
+    return render(request, template_file, {
+        "template": tpl,
+        "level": level,
+        "current_idx": current_idx,
+        "current_num": current_idx + 1,  # 后端预计算好题号
+        "total_count": len(train_queue)
+    })
+def train_complete(request):
+    # 清空残留训练session
+    if "train_queue" in request.session:
+        del request.session["train_queue"]
+    if "train_idx" in request.session:
+        del request.session["train_idx"]
+    return render(request, "train/train_complete.html")
 
+def train_error_tip(request):
+    msg = request.GET.get("msg", "题库异常，请联系管理员")
+    return render(request, "train/error_tip.html", {"msg": msg})
+# L2训练入口
 @login_required
-@role_permit("finance")
-def fin_l2_1(request):
-    email = get_object_or_404(EmailTemplateModel, id=9, department="finance")
-    return render(request, "train/finance/l2_1.html", {"email": email})
+def train_level2_view(request):
+    user_dept = request.user.role
+    template_list = list(EmailTemplateModel.objects.filter(
+        department=user_dept,
+        difficulty_level=2,
+        email_label="phish"
+    ))
+    if len(template_list) < 5:
+        return render(request, "train/error_tip.html", {"msg": "L2题库缺少完整5套模板，请联系管理员补充"})
+    random.shuffle(template_list)
+    request.session["train_queue"] = [t.id for t in template_list]
+    request.session["train_idx"] = 0
+    return redirect("train_question", tpl_id=template_list[0].id, level=2)
 
+# L3训练入口
 @login_required
-@role_permit("finance")
-def fin_l2_2(request):
-    email = get_object_or_404(EmailTemplateModel, id=10, department="finance")
-    return render(request, "train/finance/l2_2.html", {"email": email})
-
-@login_required
-@role_permit("finance")
-def fin_l3_1(request):
-    email = get_object_or_404(EmailTemplateModel, id=11, department="finance")
-    return render(request, "train/finance/l3_1.html", {"email": email})
-
-@login_required
-@role_permit("finance")
-def fin_l3_2(request):
-    email = get_object_or_404(EmailTemplateModel, id=12, department="finance")
-    return render(request, "train/finance/l3_2.html", {"email": email})
-
-# ===================== IT 游戏视图 role="it" =====================
-@login_required
-@role_permit("it")
-def it_l1_1(request):
-    email = get_object_or_404(EmailTemplateModel, id=13, department="it")
-    return render(request, "train/it/l1_1.html", {"email": email})
-
-@login_required
-@role_permit("it")
-def it_l1_2(request):
-    email = get_object_or_404(EmailTemplateModel, id=14, department="it")
-    return render(request, "train/it/l1_2.html", {"email": email})
-
-@login_required
-@role_permit("it")
-def it_l2_1(request):
-    email = get_object_or_404(EmailTemplateModel, id=15, department="it")
-    return render(request, "train/it/l2_1.html", {"email": email})
-
-@login_required
-@role_permit("it")
-def it_l2_2(request):
-    email = get_object_or_404(EmailTemplateModel, id=16, department="it")
-    return render(request, "train/it/l2_2.html", {"email": email})
-
-@login_required
-@role_permit("it")
-def it_l3_1(request):
-    email = get_object_or_404(EmailTemplateModel, id=17, department="it")
-    return render(request, "train/it/l3_1.html", {"email": email})
-
-@login_required
-@role_permit("it")
-def it_l3_2(request):
-    email = get_object_or_404(EmailTemplateModel, id=18, department="it")
-    return render(request, "train/it/l3_2.html", {"email": email})
+def train_level3_view(request):
+    user_dept = request.user.role
+    template_list = list(EmailTemplateModel.objects.filter(
+        department=user_dept,
+        difficulty_level=3,
+        email_label="phish"
+    ))
+    if len(template_list) < 5:
+        return render(request, "train/error_tip.html", {"msg": "L3题库缺少完整5套模板，请联系管理员补充"})
+    random.shuffle(template_list)
+    request.session["train_queue"] = [t.id for t in template_list]
+    request.session["train_idx"] = 0
+    return redirect("train_question", tpl_id=template_list[0].id, level=3)
 
 # ===================== 游戏提交接口（自动生成 TP/TN/FP/FN 指标，论文RQ2/RQ3） =====================
 @login_required
@@ -266,25 +285,23 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     return render(request, "profile/change_pwd.html", {"form": form})
 
-# ====================== 3. 普通用户查看自己错题记录（FN漏判、FP误判） ======================
-@login_required
-@login_required
+# ===================== 3. 普通用户查看自己错题记录（wrong 错误作答） =====================
 @login_required
 def user_error_record(request):
-    # 第一步：按邮件分组，只保留每道题最新一条错题记录（全局去重）
+    # 第一步：按邮件分组，只保留每道题最新一条错误记录
     unique_email_ids = GameRecordModel.objects.filter(
         user=request.user,
-        judge_result__in=["FN", "FP"]
+        judge_result="wrong"  # 替换原 ["FN", "FP"]，只筛选答错记录
     ).values("target_email_id").annotate(
         latest_record_id=Max("id")
     ).values_list("latest_record_id", flat=True)
 
-    # 第二步：根据唯一ID取出完整数据
+    # 第二步：根据唯一ID取出完整关联数据
     unique_error_records = GameRecordModel.objects.filter(
         id__in=unique_email_ids
     ).select_related("target_email").order_by("-id")
 
-    # 第三步：分页，每页10条（已经是去重后的数据，模板无需再过滤）
+    # 第三步：分页，每页10条
     paginator = Paginator(unique_error_records, 10)
     page_num = request.GET.get("page", 1)
     page_obj = paginator.get_page(page_num)
