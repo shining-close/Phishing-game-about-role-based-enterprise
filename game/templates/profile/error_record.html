@@ -16,14 +16,36 @@
         </tr>
         {% for item in page.object_list %}
         <tr>
-            <td>{{ item.target_email.email_title }}</td>
-            <td>{{ item.target_email.get_department_display }}</td>
+            <td>
+                {% if item.target_email %}
+                    {{ item.target_email.email_title }}
+                {% elif item.target_l2_email %}
+                    {{ item.target_l2_email.subject }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+            <td>
+                {% if item.target_email %}
+                    {{ item.target_email.get_department_display }}
+                {% elif item.target_l2_email %}
+                    {{ item.target_l2_email.department }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
             <td>
                 <span style="color:#c00;font-weight:bold;">Wrong (Misjudged)</span>
             </td>
             <td>{{ item.confidence_score }} / 5</td>
             <td style="max-width:420px;word-break:break-all;font-size:14px;">
-                {{ item.target_email.fraud_feature_description }}
+                {% if item.target_email %}
+                    {{ item.target_email.fraud_feature_description }}
+                {% elif item.target_l2_email %}
+                    {{ item.target_l2_email.scam_keywords }}
+                {% else %}
+                    —
+                {% endif %}
             </td>
         </tr>
         {% endfor %}

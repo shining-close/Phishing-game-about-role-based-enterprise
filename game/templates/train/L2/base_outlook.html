@@ -1,0 +1,133 @@
+{% extends "train/base_training.html" %}
+{% block content %}
+<style>
+*{box-sizing: border-box;margin:0;padding:0;}
+body{background:#f3f4f6;font-family:Segoe UI}
+.outlook-wrap{max-width:1400px;margin:20px auto;border:1px solid #ddd;min-height:75vh;display:grid;grid-template-columns:180px 280px 1fr;}
+.ol-left{background:#0078d4;color:#fff;padding:16px;}
+.ol-left h3{margin-bottom:24px;font-size:18px;}
+.ol-nav-item{padding:10px 8px;margin:6px 0;border-radius:4px;cursor:default;opacity:0.85;}
+.ol-nav-item.active{background:#005a9e;opacity:1;}
+.ol-middle{background:#fff;border-right:1px solid #ddd;overflow-y:auto;}
+.mail-list-title{padding:12px 16px;border-bottom:1px solid #eee;font-weight:bold;font-size:16px;}
+.mail-item{padding:14px 16px;border-bottom:1px solid #f0f0f0;cursor:pointer;}
+.mail-item:hover{background:#e8f4ff;}
+.mail-item.selected{background:#d0e7fb;}
+.mail-item.unread{font-weight:bold;}
+.mail-sender{font-size:15px;margin-bottom:4px;}
+.mail-subject{font-size:14px;color:#333;}
+.ol-right{background:#fff;padding:24px;padding-bottom: 110px;overflow-y:auto;position:relative;overflow:visible !important;}
+.mail-detail-header{border-bottom:1px solid #eee;padding-bottom:16px;margin-bottom:20px;}
+.mail-from{font-size:16px;margin-bottom:8px;}
+.mail-to{color:#666;font-size:14px;margin-bottom:12px;}
+.mail-detail-body{font-size:16px;line-height:1.7;color:#222;}
+.fake-link{color:#0078d4;cursor:default;position:relative;display:inline-block;overflow:visible !important;pointer-events:auto;}
+.fake-link a{pointer-events:none;color:inherit;text-decoration:underline;cursor:default;}
+.fake-link .link-tip{display:none;position:absolute;bottom:130%;left:0;background:#222;color:#fff;padding:10px 14px;border-radius:6px;font-size:13px;white-space:nowrap;z-index:99999;}
+.fake-link:hover .link-tip{display:block;}
+.operate-bar{width:100%;padding:16px 24px;border-top:1px solid #ddd;display:flex;align-items:center;gap:24px;background:#fff;position:sticky;bottom:0;z-index:10;}
+.btn-judge{padding:12px 26px;border-radius:6px;border:none;font-size:16px;cursor:pointer;}
+.btn-phish{background:#0078d4;color:#fff;}
+.btn-normal{background:#fff;color:#0078d4;border:1px solid #0078d4 !important;}
+.conf-box{font-size:17px;}
+.conf-box input{padding:8px;width:100px;font-size:16px;margin-left:8px;}
+.result-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:9999;}
+.modal-inner{width:800px;background:#fff;margin:120px auto;padding:40px;border-radius:12px;}
+.correct-title{color:#009944;font-size:30px;margin-bottom:20px;}
+.wrong-title{color:#dd3333;font-size:30px;margin-bottom:20px;}
+.desc-text{font-size:17px;line-height:1.8;color:#333;margin-bottom:30px;}
+.next-btn{padding:12px 30px;background:#0078d4;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;}
+</style>
+
+<div style="max-width:1400px;margin:12px auto 0;padding:0 24px;font-size:19px;font-weight:bold;">
+    Question {{ current_num }} / {{ total_count }}
+</div>
+
+<div class="outlook-wrap">
+    <div class="ol-left">
+        <h3>Mail</h3>
+        <div class="ol-nav-item active">Inbox</div>
+        <div class="ol-nav-item">Sent Items</div>
+        <div class="ol-nav-item">Drafts</div>
+        <div class="ol-nav-item">Junk Email</div>
+        <div class="ol-nav-item">Deleted Items</div>
+    </div>
+    <div class="ol-middle">
+        <div class="mail-list-title">Training Mails</div>
+        {% block mail_list %}
+        {% endblock %}
+    </div>
+    <div class="ol-right">
+        <div class="mail-detail-header">
+            <div class="mail-from">From: {{ template.sender }}</div>
+            <div class="mail-to">
+                To:
+                {% if template.recipient.strip %}
+                    {{ template.recipient }}
+                {% else %}
+                    {{ request.user.email }}
+                {% endif %}
+            </div>
+        </div>
+        <div class="mail-detail-body">
+            {% block mail_content %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+
+<div class="operate-bar">
+    <div>
+        <button class="btn-judge btn-phish" onclick="submitJudge('phish')">Phishing Attack</button>
+        <button class="btn-judge btn-normal" onclick="submitJudge('legit')">Legitimate</button>
+    </div>
+    <div class="conf-box">
+        Confidence (1-5):
+        <input type="number" id="conf_score" min="1" max="5" value="3">
+    </div>
+</div>
+
+<div class="result-modal" id="modal">
+    <div class="modal-inner">
+        <h2 id="modal-title"></h2>
+        <p class="desc-text" id="modal-text"></p>
+        <button class="next-btn" onclick="goNext()">Next question</button>
+    </div>
+</div>
+
+<form id="judge-form" action="{% url 'train_question' level=level tpl_id=template.id %}" method="POST" hidden>
+    {% csrf_token %}
+    <input type="hidden" name="judge_result" id="input-judge">
+    <input type="hidden" name="confidence" id="input-conf">
+    <input type="hidden" name="level" value="{{ level }}">
+    <input type="hidden" name="email_id" value="{{ template.id }}">
+</form>
+<script>
+const modal = document.getElementById('modal');
+const titleDom = document.getElementById('modal-title');
+const textDom = document.getElementById('modal-text');
+const form = document.getElementById('judge-form');
+const inputJudge = document.getElementById('input-judge');
+const confInput = document.getElementById('conf_score');
+const realLabel = "{{ template.email_label }}";
+const analysisText = `{{ template.analysis_description }}`;
+
+function submitJudge(userChoice){
+    let conf = confInput.value || 3;
+    document.getElementById('input-conf').value = conf;
+    inputJudge.value = userChoice;
+    modal.style.display = "block";
+    if(userChoice === realLabel){
+        titleDom.innerText = "✅ Correct judgment";
+        titleDom.className = "correct-title";
+    }else{
+        titleDom.innerText = "❌ Wrong judgment";
+        titleDom.className = "wrong-title";
+    }
+    textDom.innerText = analysisText;
+}
+function goNext(){
+    form.submit();
+}
+</script>
+{% endblock %}

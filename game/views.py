@@ -4,10 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from functools import wraps
 from .forms import RegisterForm, LoginForm
-from .models import EmailTemplateModel, GameRecordModel
+from .models import EmailTemplateModel, GameRecordModel, Level2EmailTemplateModel
 from django.core.paginator import Paginator
 from django.db.models import Max
 import random
+from django.core.paginator import Paginator
+
+
+
 # Difine a decorator to restrict access to views based on user role
 def role_permit(allow_role):
     def decorator(view_func):
@@ -72,29 +76,30 @@ def home_view(request):
     return render(request, "home.html")
 
 # ====================== Train ======================
-# For Level 1
+import random
+from django.shortcuts import redirect, render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import Http404
+from .models import EmailTemplateModel, Level2EmailTemplateModel, GameRecordModel
+
+# ====================== Train Level 1 ======================
 @login_required
 def train_level1_view(request):
     user_dept = request.user.role
     train_question_list = []
-    # 遍历5个模板序号 1~5
     for serial_num in [1,2,3,4,5]:
-        # 不再限制 phish，phish+legit 全部查询出来
         serial_all_mail = EmailTemplateModel.objects.filter(
             department=user_dept,
             difficulty_level=1,
             template_serial=serial_num
         )
         mail_list = list(serial_all_mail)
-        # 校验：该序号至少要有1封邮件（钓鱼/正常都行）
         if len(mail_list) == 0:
-            msg = f"L1 模板序号{serial_num}未录入任何邮件(钓鱼/正常均可)，请管理员补充题库"
+            msg = f"L1 template serial {serial_num} has no emails. Please contact admin to add templates."
             return render(request, "train/error_tip.html", {"msg": msg})
-        # 该序号下随机抽1封（可能是钓鱼、也可能是正常邮件）
         pick_one = random.choice(mail_list)
         train_question_list.append(pick_one)
-
-    # 打乱5道题整体顺序
     random.shuffle(train_question_list)
     request.session["train_queue"] = [obj.id for obj in train_question_list]
     request.session["train_idx"] = 0
@@ -102,69 +107,46 @@ def train_level1_view(request):
 
 @login_required
 def train_question(request, level, tpl_id):
-    from .models import EmailTemplateModel, GameRecordModel
     train_queue = request.session.get("train_queue", [])
     current_idx = request.session.get("train_idx", 0)
-    user_dept = request.user.role
-    # 会话合法性校验：只能按队列顺序访问题目
+    # 校验session队列合法性
     if not train_queue or current_idx >= len(train_queue) or train_queue[current_idx] != tpl_id:
         return redirect(f"train_l{level}")
+
+    template = None
+    template_file = ""
     try:
-        # 仅校验部门、难度，不限制邮件类型（钓鱼/正常都参与训练）
-        tpl = EmailTemplateModel.objects.get(
-            id=tpl_id,
-            department=user_dept,
-            difficulty_level=level
-        )
-    except EmailTemplateModel.DoesNotExist:
-        # 模板不属于当前用户/不存在，打回训练首页
+        if level == 1:
+            template = EmailTemplateModel.objects.get(id=tpl_id)
+            template_file = f"train/L1/L1_{template.template_serial}.html"
+        elif level == 2:
+            template = Level2EmailTemplateModel.objects.get(id=tpl_id)
+            template_file = f"train/L2/{template.template_type}.html"
+        elif level == 3:
+            template = EmailTemplateModel.objects.get(id=tpl_id)
+            template_file = f"train/L1/L1_{template.template_serial}.html"
+    except (EmailTemplateModel.DoesNotExist, Level2EmailTemplateModel.DoesNotExist):
+        # 模板已删除，清空训练会话，重置训练
+        if "train_queue" in request.session:
+            del request.session["train_queue"]
+        if "train_idx" in request.session:
+            del request.session["train_idx"]
+        messages.warning(request, "Some training emails were removed, training restarted.")
         return redirect(f"train_l{level}")
-    # 拼接对应页面路径 train/Lx/Lx_x.html
-    template_file = f"train/L{level}/L{level}_{tpl.template_serial}.html"
+
     if request.method == "POST":
-        # 读取用户前端点击的判断选项 phish / legit
-        user_choice = request.POST.get("judge_result")
-        # 读取置信度
-        conf_score = int(request.POST.get("conf_score", 3))
-        # 限制分数 1~5
-        conf_score = max(1, min(5, conf_score))
+        return submit_game_record(request)
 
-        # 对比用户选择与真实标签，二分标记 right / wrong
-        if user_choice == tpl.email_label:
-            auto_judge = "right"
-        else:
-            auto_judge = "wrong"
-
-        # 保存作答记录
-        GameRecordModel.objects.create(
-            user=request.user,
-            target_email=tpl,
-            judge_result=auto_judge,
-            confidence_score=conf_score
-        )
-        # 题号+1
-        request.session["train_idx"] = current_idx + 1
-        next_idx = current_idx + 1
-        # 5题全部完成，清空会话跳转完成页
-        if next_idx >= len(train_queue):
-            if "train_queue" in request.session:
-                del request.session["train_queue"]
-            if "train_idx" in request.session:
-                del request.session["train_idx"]
-            return redirect("train_complete")
-        # 跳转下一题
-        next_tpl_id = train_queue[next_idx]
-        return redirect("train_question", level=level, tpl_id=next_tpl_id)
-    # GET 请求：渲染页面
+    total_count = len(train_queue)
+    current_num = current_idx + 1
     return render(request, template_file, {
-        "template": tpl,
+        "template": template,
         "level": level,
-        "current_idx": current_idx,
-        "current_num": current_idx + 1,  # 后端预计算好题号
-        "total_count": len(train_queue)
+        "current_num": current_num,
+        "total_count": total_count
     })
+
 def train_complete(request):
-    # 清空残留训练session
     if "train_queue" in request.session:
         del request.session["train_queue"]
     if "train_idx" in request.session:
@@ -172,25 +154,25 @@ def train_complete(request):
     return render(request, "train/train_complete.html")
 
 def train_error_tip(request):
-    msg = request.GET.get("msg", "题库异常，请联系管理员")
+    msg = request.GET.get("msg", "Question bank abnormal, contact administrator")
     return render(request, "train/error_tip.html", {"msg": msg})
-# L2训练入口
+
+# ====================== Train Level 2 ======================
 @login_required
 def train_level2_view(request):
     user_dept = request.user.role
-    template_list = list(EmailTemplateModel.objects.filter(
+    template_list = list(Level2EmailTemplateModel.objects.filter(
         department=user_dept,
-        difficulty_level=2,
-        email_label="phish"
+        difficulty_level=2
     ))
     if len(template_list) < 5:
-        return render(request, "train/error_tip.html", {"msg": "L2题库缺少完整5套模板，请联系管理员补充"})
+        return render(request, "train/error_tip.html", {"msg": "L2 question bank has less than 5 emails"})
     random.shuffle(template_list)
     request.session["train_queue"] = [t.id for t in template_list]
     request.session["train_idx"] = 0
-    return redirect("train_question", tpl_id=template_list[0].id, level=2)
+    return redirect("train_question", level=2, tpl_id=template_list[0].id)
 
-# L3训练入口
+# ====================== Train Level 3 ======================
 @login_required
 def train_level3_view(request):
     user_dept = request.user.role
@@ -200,60 +182,103 @@ def train_level3_view(request):
         email_label="phish"
     ))
     if len(template_list) < 5:
-        return render(request, "train/error_tip.html", {"msg": "L3题库缺少完整5套模板，请联系管理员补充"})
+        msg = "L3 question bank lacks 5 phishing templates, contact admin to add."
+        return render(request, "train/error_tip.html", {"msg": msg})
     random.shuffle(template_list)
     request.session["train_queue"] = [t.id for t in template_list]
     request.session["train_idx"] = 0
     return redirect("train_question", tpl_id=template_list[0].id, level=3)
 
-# ===================== 游戏提交接口（自动生成 TP/TN/FP/FN 指标，论文RQ2/RQ3） =====================
+# ====================== Submit Game Record ======================
 @login_required
 def submit_game_record(request):
-    # 只允许POST表单提交，GET直接跳收件箱
     if request.method != "POST":
         return redirect("inbox")
 
-    # 1. 获取表单提交全部参数
-    user = request.user                                  # 当前登录训练用户
-    email_id = request.POST.get("email_id")              # 当前作答邮件ID
-    user_judge = request.POST.get("user_judge")           # 用户判断：phish / legit
-    conf = int(request.POST.get("confidence", 3))        # 用户自信度1-5，无传参默认3
-    scam_tag = request.POST.get("scam_type", "")         # 诈骗类型标签（页面写死fake_recruit_cv）
+    user = request.user
+    email_id = request.POST.get("email_id")
+    level = request.POST.get("level", "1")
+    user_judge = request.POST.get("judge_result")
 
-    # 2. 根据ID获取当前作答邮件数据库对象
-    email_obj = get_object_or_404(EmailTemplateModel, id=email_id)
-    real_label = email_obj.email_label                   # 邮件真实分类 phish/legit
-
-    # 修复自信度转换报错
     conf_raw = request.POST.get("confidence", "")
+    conf = 3
     if conf_raw.strip() and conf_raw.isdigit():
         conf = int(conf_raw)
-    else:
-        conf = 3
+
     scam_tag = request.POST.get("scam_type", "")
+    email_obj = None
+    try:
+        if level == "1" or level == "3":
+            email_obj = EmailTemplateModel.objects.get(id=email_id)
+        elif level == "2":
+            email_obj = Level2EmailTemplateModel.objects.get(id=email_id)
+    except (EmailTemplateModel.DoesNotExist, Level2EmailTemplateModel.DoesNotExist):
+        if "train_queue" in request.session:
+            del request.session["train_queue"]
+        if "train_idx" in request.session:
+            del request.session["train_idx"]
+        messages.warning(request, "Training email missing, restart training.")
+        return redirect(f"train_l{level}")
 
-    # 3. 四分类混淆矩阵计算核心逻辑
-    if real_label == "phish" and user_judge == "phish":
-        res = "TP"  # 真阳性：正确识别钓鱼邮件
-    elif real_label == "legit" and user_judge == "legit":
-        res = "TN"  # 真阴性：正确识别正规邮件
-    elif real_label == "legit" and user_judge == "phish":
-        res = "FP"  # 假阳性：正常邮件误判钓鱼（误报）
-    else:
-        res = "FN"  # 假阴性：钓鱼邮件误判正常（漏报，高危）
+    real_label = email_obj.email_label
+    res = "right" if user_judge == real_label else "wrong"
 
-    # 4. 写入游戏作答记录到数据库 GameRecordModel
-    GameRecordModel.objects.create(
-        user=user,
-        target_email=email_obj,
-        judge_result=res,          # 存入TP/TN/FP/FN分类结果
-        confidence_score=conf,     # 存入用户自主选择的自信分数1-5
-        scam_type_tag=scam_tag
-    )
+    if level == "1" or level == "3":
+        GameRecordModel.objects.create(
+            user=user,
+            target_email=email_obj,
+            target_l2_email=None,
+            judge_result=res,
+            confidence_score=conf,
+            scam_type_tag=scam_tag
+        )
+    elif level == "2":
+        GameRecordModel.objects.create(
+            user=user,
+            target_email=None,
+            target_l2_email=email_obj,
+            judge_result=res,
+            confidence_score=conf,
+            scam_type_tag=scam_tag
+        )
 
-    # 页面提示+跳转训练收件箱
-    messages.success(request, "Judgement saved, return to training inbox.")
-    return redirect("inbox")
+    # ==========【核心修复：更新当前题号索引存入session】==========
+    current_idx = request.session.get("train_idx", 0)
+    next_idx = current_idx + 1
+    request.session["train_idx"] = next_idx  # 必须这一行！
+
+    queue = request.session["train_queue"]
+    if next_idx >= len(queue):
+        # 全部题目做完 → 跳转训练完成页面
+        return redirect("train_complete")
+    # 进入下一题
+    return redirect("train_question", level=level, tpl_id=queue[next_idx])
+
+# ====================== User Wrong Record ======================
+@login_required
+def user_error_record(request):
+    from django.core.paginator import Paginator
+    all_wrong = GameRecordModel.objects.filter(
+        user=request.user,
+        judge_result="wrong"
+    ).select_related("target_email", "target_l2_email").order_by("-operation_timestamp")
+
+    seen_keys = set()
+    unique_list = []
+    for rec in all_wrong:
+        key = None
+        if rec.target_email:
+            key = f"L1_{rec.target_email.id}"
+        elif rec.target_l2_email:
+            key = f"L2_{rec.target_l2_email.id}"
+        if key and key not in seen_keys:
+            seen_keys.add(key)
+            unique_list.append(rec)
+
+    paginator = Paginator(unique_list, 10)
+    page_num = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_num)
+    return render(request, "profile/error_record.html", {"page": page_obj})
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -284,33 +309,6 @@ def change_password(request):
     else:
         form = PasswordChangeForm(request.user)
     return render(request, "profile/change_pwd.html", {"form": form})
-
-# ===================== 3. 普通用户查看自己错题记录（wrong 错误作答） =====================
-@login_required
-def user_error_record(request):
-    # 第一步：按邮件分组，只保留每道题最新一条错误记录
-    unique_email_ids = GameRecordModel.objects.filter(
-        user=request.user,
-        judge_result="wrong"  # 替换原 ["FN", "FP"]，只筛选答错记录
-    ).values("target_email_id").annotate(
-        latest_record_id=Max("id")
-    ).values_list("latest_record_id", flat=True)
-
-    # 第二步：根据唯一ID取出完整关联数据
-    unique_error_records = GameRecordModel.objects.filter(
-        id__in=unique_email_ids
-    ).select_related("target_email").order_by("-id")
-
-    # 第三步：分页，每页10条
-    paginator = Paginator(unique_error_records, 10)
-    page_num = request.GET.get("page", 1)
-    page_obj = paginator.get_page(page_num)
-
-    return render(
-        request,
-        "profile/error_record.html",
-        {"page": page_obj}
-    )
 
 # ====================== 4. 用户提交角色变更申请 ======================
 @login_required

@@ -1,41 +1,73 @@
 {% extends 'base.html' %}
-{% block title %}Role-Based Enterprise Phishing Simulation Test{% endblock %}
-
+{% block title %}Enterprise Phishing Simulation Training Platform{% endblock %}
 {% block content %}
-<div style="text-align: center; margin-top: 100px;">
-    <h1>Welcome to Enterprise Phishing Simulation Training Platform</h1>
-    <h3 style="color: #555; margin-top: 12px;">
-        Gamified anti-phishing test for HR, Finance and IT departments
-    </h3>
-    <hr style="width: 70%; margin: 40px auto;">
+<style>
+.wrap{
+    text-align:center;
+    margin-top:60px;
+}
+h1{
+    font-size:36px;
+    margin-bottom:12px;
+}
+.subtitle{
+    font-size:20px;
+    color:#555;
+    margin-bottom:40px;
+}
+hr{
+    width:75%;
+    margin:0 auto 45px;
+}
+/* 关键：弹性布局，两端分散对齐、水平居中 */
+.button-row{
+    display:flex;
+    justify-content: space-evenly; /* 按钮分散均匀分布 */
+    max-width:700px;
+    margin:0 auto;
+}
+.btn-blue{
+    display:block;
+    padding:16px 36px;
+    background:#0052cc; /* 和你截图深蓝色按钮一致 */
+    color:#fff;
+    font-size:20px;
+    border-radius:10px;
+    text-decoration:none;
+    white-space:nowrap;
+}
+.btn-grey{
+    display:block;
+    padding:16px 36px;
+    background:#2d2d2d;
+    color:#fff;
+    font-size:20px;
+    border-radius:10px;
+    text-decoration:none;
+    white-space:nowrap;
+}
+.desc-text{
+    max-width:850px;
+    margin:70px auto 0;
+    font-size:18px;
+    color:#555;
+    line-height:1.7;
+}
+</style>
 
-    <!-- Dynamic buttons for login/logout status -->
-    <div style="margin-top: 50px;">
-        {% if not user.is_authenticated %}
-            <a href="{% url 'register' %}" style="display: inline-block; padding: 12px 30px; background: #0052cc; color: white; text-decoration: none; border-radius: 5px; font-size: 17px; margin: 0 12px;">
-                Register New Trainee Account
-            </a>
-            <a href="{% url 'login' %}" style="display: inline-block; padding: 12px 30px; background: #2d2d2d; color: white; text-decoration: none; border-radius: 5px; font-size: 17px; margin: 0 12px;">
-                Sign In to System
-            </a>
-        {% else %}
-            <p style="font-size: 19px;">Welcome back, {{ user.username }} ({{ user.get_role_display }})</p>
-            <a href="{% url 'inbox' %}" style="display: inline-block; padding: 12px 30px; background: #00875a; color: white; text-decoration: none; border-radius: 5px; font-size: 17px; margin-top: 16px;">
-                Open My Exclusive Training Inbox
-            </a>
-        {% endif %}
+<div class="wrap">
+    <h1>Welcome to Enterprise Phishing Simulation Training Platform</h1>
+    <p class="subtitle">Gamified anti-phishing test for HR, Finance and IT departments</p>
+    <hr>
+
+    <div class="button-row">
+        <a href="{% url 'register' %}" class="btn-blue">Register New Trainee Account</a>
+        <a href="{% url 'login' %}" class="btn-grey">Sign In to System</a>
     </div>
 
-    <!-- Platform description text -->
-    <div style="margin-top: 80px; color: #666; max-width: 800px; margin-left: auto; margin-right: auto;">
-        <p style="font-size: 16px;">
-            This platform provides role-isolated phishing simulation scenes.
-            Each employee can only view training emails matched to their department:
-            Human Resources, Finance Department, IT Department.
-        </p>
-        <p style="font-size: 16px; margin-top: 10px;">
-            Complete the email judgement game to improve your ability to identify scam emails.
-        </p>
+    <div class="desc-text">
+        <p>This platform provides role-isolated phishing simulation scenes. Each employee can only view training emails matched to their department: Human Resources, Finance Department, IT Department.</p>
+        <p>Complete the email judgement game to improve your ability to identify scam emails.</p>
     </div>
 </div>
 {% endblock %}

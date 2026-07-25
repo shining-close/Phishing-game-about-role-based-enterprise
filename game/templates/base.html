@@ -1,32 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %}Enterprise Anti-Phishing Training Platform{% endblock %}</title>
-    <style>
-        .container { width: 90%; margin: 30px auto; }
-        nav { background: #222222; padding: 12px; color: #fff; }
-        nav a { color: #fff; margin: 0 12px; text-decoration: none; }
-        .mail-card { border: 1px solid #cccccc; padding: 16px; margin: 12px 0; border-radius: 6px; }
-    </style>
+<meta charset="UTF-8">
+<title>{% block title %}Enterprise Anti-Phishing Training Platform{% endblock %}</title>
+<style>
+.container { width: 90%; margin: 30px auto; }
+nav {
+    background: #0052cc;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.nav-left a, .nav-right a {
+    color: #ffffff;
+    margin: 0 14px;
+    text-decoration: none;
+    font-size:18px;
+}
+.nav-left a:first-child{
+    margin-left:0;
+}
+.nav-right span{
+    color:#fff;
+    font-size:18px;
+}
+.nav-right a:last-child{
+    margin-right:0;
+}
+.nav-left a:hover,.nav-right a:hover{
+    text-decoration:underline;
+}
+.mail-card { border: 1px solid #ccc; padding: 16px; margin: 12px 0; border-radius: 6px; }
+</style>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav>
+<nav>
+    <!-- 左侧固定导航 -->
+    <div class="nav-left">
     {% if user.is_authenticated %}
-        Welcome, {{ user.username }} | Role: {{ user.get_role_display }}
+        <a href="{% url 'home' %}">Home</a>
         <a href="{% url 'inbox' %}">My Role-Specific Inbox</a>
-        <a href="{% url 'profile' %}">Personal Center</a>
-        <a href="{% url 'logout' %}">Sign Out</a>
     {% else %}
         <a href="{% url 'home' %}">Home</a>
         <a href="{% url 'register' %}">New User Registration</a>
+    {% endif %}
+    </div>
+
+    <!-- 右侧：注册、登录、用户信息、个人中心、登出 -->
+    <div class="nav-right">
+    {% if user.is_authenticated %}
+        <span>Welcome, {{ user.username }} | Role: {{ user.get_role_display }}</span>
+        <a href="{% url 'profile' %}">Personal Center</a>
+        <a href="{% url 'logout' %}">Sign Out</a>
+    {% else %}
+        
         <a href="{% url 'login' %}">Log In</a>
     {% endif %}
-    </nav>
-
-    <div class="container">
-        {% block content %}{% endblock %}
     </div>
+</nav>
+
+<div class="container">
+{% block content %}{% endblock %}
+</div>
 </body>
 </html>
