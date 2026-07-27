@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Error & Penalty Records{% endblock %}
+
+{% block content %}
+<h1>Your Misjudgment & Penalty Logs</h1>
+<table border="1" cellpadding="12" style="width:100%;border-collapse:collapse;margin:20px 0;">
+    <tr style="background:#f5f5f5;">
+        <th>Operation Time</th>
+        <th>Email Subject</th>
+        <th>Real Mail Type</th>
+        <th>Your Operation</th>
+        <th>Operation Detail</th>
+    </tr>
+    {% for item in page_data.object_list %}
+    <tr>
+        <td>{{ item.action_time }}</td>
+        <td>{{ item.mail.subject }}</td>
+        <td>{{ item.mail.get_email_label_display }}</td>
+        <td>{{ item.get_action_type_display }}</td>
+        <td><a href="{% url 'error_record_detail' item.id %}">View deduction & reason</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" style="text-align:center;color:#777;">No penalty records yet</td></tr>
+    {% endfor %}
+</table>
+
+<!-- 分页控件 -->
+<div style="margin:20px 0;">
+    {% if page_data.has_previous %}
+        <a href="?page={{ page_data.previous_page_number }}">Previous Page</a>
+    {% endif %}
+    <span style="margin:0 12px;">Page {{ page_data.number }} / {{ page_data.paginator.num_pages }}</span>
+    {% if page_data.has_next %}
+        <a href="?page={{ page_data.next_page_number }}">Next Page</a>
+    {% endif %}
+</div>
+
+<a href="{% url 'profile' %}">← Back to Personal Center</a>
+{% endblock %}

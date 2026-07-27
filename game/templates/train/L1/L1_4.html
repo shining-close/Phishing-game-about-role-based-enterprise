@@ -1,6 +1,3 @@
-{% extends "train/L1/base_normalemail.html" %}
-
-{% block mail_content %}
 <!-- 发件人头部 -->
 <div class="mail-header">
     <div class="avatar-sender">{{ template.email_title|slice:":1" }}</div>
@@ -27,4 +24,3 @@
         <button class="open-btn" data-tip="{{ template.fake_link }}">Open Link</button>
     </div>
 </div>
-{% endblock %}

@@ -1,39 +1,28 @@
 {% extends "base.html" %}
 {% block title %}Change Password{% endblock %}
+
 {% block content %}
-<div style="max-width:600px;margin:4rem auto;padding:0 20px;">
-    <h2>Modify Account Password</h2>
-    <hr style="margin:20px 0;">
-    <form method="POST">
-        {% csrf_token %}
-        <div style="margin:18px 0;">
-            <label style="display:block;margin-bottom:6px;font-weight:500;">{{ form.old_password.label }}</label>
-            {{ form.old_password }}
-            {% if form.old_password.errors %}
-            <p style="color:red;margin:4px 0 0 0;font-size:14px;">{{ form.old_password.errors.0 }}</p>
-            {% endif %}
-        </div>
-        <div style="margin:18px 0;">
-            <label style="display:block;margin-bottom:6px;font-weight:500;">{{ form.new_password1.label }}</label>
-            {{ form.new_password1 }}
-            {% if form.new_password1.errors %}
-            <p style="color:red;margin:4px 0 0 0;font-size:14px;">{{ form.new_password1.errors.0 }}</p>
-            {% endif %}
-        </div>
-        <div style="margin:18px 0;">
-            <label style="display:block;margin-bottom:6px;font-weight:500;">{{ form.new_password2.label }}</label>
-            {{ form.new_password2 }}
-            {% if form.new_password2.errors %}
-            <p style="color:red;margin:4px 0 0 0;font-size:14px;">{{ form.new_password2.errors.0 }}</p>
-            {% endif %}
-        </div>
-        <button type="submit" style="padding:12px 30px;background:#165DFF;color:white;border:none;border-radius:8px;font-size:16px;">
-            Save New Password
-        </button>
-        <a href="{% url 'profile' %}" style="margin-left:16px;color:#165DFF;">Back to Profile</a>
-    </form>
-</div>
-<style>
-    input{width:100%;padding:10px;font-size:16px;border:1px solid #ccc;border-radius:6px;}
-</style>
+<h1>Change Login Password</h1>
+{% if messages %}
+    {% for msg in messages %}
+        <p style="color:{% if msg.tags == 'error' %}red{% else %}green{% endif %};">{{ msg }}</p>
+    {% endfor %}
+{% endif %}
+<form method="post" style="max-width:520px;margin-top:20px;">
+    {% csrf_token %}
+    <div style="margin:14px 0;">
+        <label>Original Password</label><br>
+        <input type="password" name="old_password" required style="width:100%;padding:9px;margin-top:6px;">
+    </div>
+    <div style="margin:14px 0;">
+        <label>New Password</label><br>
+        <input type="password" name="new_password" required style="width:100%;padding:9px;margin-top:6px;">
+    </div>
+    <div style="margin:14px 0;">
+        <label>Confirm New Password</label><br>
+        <input type="password" name="confirm_password" required style="width:100%;padding:9px;margin-top:6px;">
+    </div>
+    <button type="submit" style="padding:10px 24px;background:#165DFF;color:#fff;border:none;border-radius:6px;">Submit Modify</button>
+</form>
+<a href="{% url 'profile' %}" style="display:block;margin-top:16px;">← Back to Personal Center</a>
 {% endblock %}

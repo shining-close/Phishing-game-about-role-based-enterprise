@@ -38,18 +38,17 @@ nav {
 </style>
 </head>
 <body>
+{% block top_nav %}
 <nav>
     <!-- 左侧固定导航 -->
     <div class="nav-left">
     {% if user.is_authenticated %}
-        <!-- <a href="{% url 'home' %}">Home</a> -->
-        <a href="{% url 'inbox' %}">Inbox</a>
+        <a href="{% url 'home' %}">Home</a>
     {% else %}
         <a href="{% url 'home' %}">Home</a>
         <a href="{% url 'register' %}">Registration</a>
     {% endif %}
     </div>
-
     <!-- 右侧：注册、登录、用户信息、个人中心、登出 -->
     <div class="nav-right">
     {% if user.is_authenticated %}
@@ -57,11 +56,11 @@ nav {
         <a href="{% url 'profile' %}">Personal Center</a>
         <a href="{% url 'logout' %}">Sign Out</a>
     {% else %}
-        
         <a href="{% url 'login' %}">Log In</a>
     {% endif %}
     </div>
 </nav>
+{% endblock %}
 
 <div class="container">
 {% block content %}{% endblock %}

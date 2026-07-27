@@ -1,5 +1,5 @@
 {% extends "train/base_training.html" %}
-{% block title %}Level {{ level }} Training{% endblock %}
+{% block title %}Pre-Test Baseline Assessment{% endblock %}
 {% block content %}
 <style>
 /* 全局基础样式 */
@@ -16,7 +16,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
 }
 .progress-text {
     font-size: 20px;
@@ -213,9 +212,8 @@
     cursor: pointer;
 }
 </style>
-
 <div class="mail-wrap">
-    <!-- 顶部题号（统一读取 current_num / total_count，视图自动更新） -->
+    <!-- 顶部题号 -->
     <div class="top-bar">
         <div class="progress-text">Question {{ current_num }} / {{ total_count }}</div>
         <div class="top-btns">
@@ -224,17 +222,18 @@
         </div>
     </div>
 
-    <!-- 可变邮件区块：子模板填充 -->
-    {% block mail_content %}{% endblock %}
+    <!-- 核心：自动引入 L1_1 / L1_2 ... 子模板 -->
+    {% block mail_content %}
+    {% include sub_template %}
+    {% endblock %}
 
-    <!-- 置信度输入固定 -->
+    <!-- 置信度输入 -->
     <div class="conf-box">
         <label>Confidence (1-5):</label>
         <input type="number" id="conf_score" min="1" max="5" value="3" required>
     </div>
 </div>
-
-<!-- 弹窗固定 -->
+<!-- 弹窗 -->
 <div class="result-modal" id="modal">
     <div class="modal-inner">
         <h2 id="modal-title"></h2>
@@ -242,17 +241,14 @@
         <button class="next-btn" onclick="goNext()">Next question</button>
     </div>
 </div>
-
-<!-- 提交表单固定，携带level、email_id -->
-<form id="judge-form" action="{% url 'train_question' level=level tpl_id=template.id %}" method="POST" hidden>
+<!-- 提交表单 -->
+<form id="judge-form" action="{% url 'pretest_question' tpl_id=template.id %}" method="POST" hidden>
     {% csrf_token %}
     <input type="hidden" name="judge_result" id="input-judge">
     <input type="hidden" name="confidence" id="input-conf">
-    <input type="hidden" name="level" value="{{ level }}">
     <input type="hidden" name="email_id" value="{{ template.id }}">
 </form>
-
-<!-- 全局JS固定 -->
+<!-- JS逻辑 -->
 <script>
 const modal = document.getElementById('modal');
 const titleDom = document.getElementById('modal-title');
@@ -262,7 +258,6 @@ const inputJudge = document.getElementById('input-judge');
 const confInput = document.getElementById('conf_score');
 const realLabel = "{{ template.email_label }}";
 const scamDesc = `{{ template.fraud_feature_description }}`;
-
 function submitJudge(userChoice){
     let conf = confInput.value || 3;
     document.getElementById('input-conf').value = conf;

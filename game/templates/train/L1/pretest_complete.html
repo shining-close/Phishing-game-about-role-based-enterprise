@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Pre-Test Completed{% endblock %}
+{% block content %}
+<div style="text-align:center;margin-top:80px;">
+    <h1 style="font-size:36px;color:#007722;">✅ Baseline Pre-Test Finished</h1>
+    <p style="font-size:20px;margin:20px 0;">You have completed all pre-test questions.</p>
+    <p style="font-size:18px;color:#444;">Your baseline data has been saved to the system.</p>
+    <p style="font-size:18px;color:#444;">Now you can unlock Level 2 Intermediate Training from the homepage.</p>
+    <br>
+    <a href="{% url 'home' %}" style="display:inline-block;padding:14px 32px;background:#a1bf88;color:white;border-radius:10px;text-decoration:none;font-size:18px;">
+        Back to Home Page
+    </a>
+</div>
+{% endblock %}

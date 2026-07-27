@@ -1,50 +1,37 @@
-{% extends "train/L2/base_outlook.html" %}
-
-{% block mail_list %}
-<div class="mail-item unread selected">
-    <div class="mail-sender">{{ template.sender }}</div>
-    <div class="mail-subject">{{ template.subject }}</div>
-</div>
-{% endblock %}
-
-{% block mail_content %}
+{% comment %}删除所有extends、block标签，只留纯邮件正文HTML{% endcomment %}
 {% if template.content_1 %}
 <p>{{ template.content_1 }}</p>
 {% if template.url_1 %}
 <p class="fake-link">
-    <a href="#">{{ template.url_1 }}</a>
+    <a href="#" onclick="recordAction({{ template.id }}, 'click_link')">{{ template.url_1 }}</a>
     <span class="link-tip">{{ template.url_1 }}</span>
 </p>
 {% endif %}
 {% endif %}
-
 {% if template.content_2 %}
 <p>{{ template.content_2 }}</p>
 {% if template.url_2 %}
 <p class="fake-link">
-    <a href="#">{{ template.url_2 }}</a>
+    <a href="#" onclick="recordAction({{ template.id }}, 'click_link')">{{ template.url_2 }}</a>
     <span class="link-tip">{{ template.url_2 }}</span>
 </p>
 {% endif %}
 {% endif %}
-
 {% if template.content_3 %}
 <p>{{ template.content_3 }}</p>
 {% if template.url_3 %}
 <p class="fake-link">
-    <a href="#">{{ template.url_3 }}</a>
+    <a href="#" onclick="recordAction({{ template.id }}, 'click_link')">{{ template.url_3 }}</a>
     <span class="link-tip">{{ template.url_3 }}</span>
 </p>
 {% endif %}
 {% endif %}
-
 {% if template.content_4 %}
 <p>{{ template.content_4 }}</p>
 {% if template.url_4 %}
 <p class="fake-link">
-    <a href="#">{{ template.url_4 }}</a>
+    <a href="#" onclick="recordAction({{ template.id }}, 'click_link')">{{ template.url_4 }}</a>
     <span class="link-tip">{{ template.url_4 }}</span>
 </p>
 {% endif %}
 {% endif %}
-{% endblock %}

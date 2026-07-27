@@ -1,26 +1,231 @@
 {% extends "base.html" %}
-{% block title %}Inbox - Mail Training Center{% endblock %}
+{% block title %}Level 2 Intermediate Training | Outlook Mail Simulator{% endblock %}
+
+{# 隐藏base里的全局导航栏，DOM保留不破坏布局 #}
+{% block top_nav %}
+<div style="display: none;"></div>
+{% endblock %}
+
 {% block content %}
-<div style="max-width:1200px;margin:2rem auto;padding:0 16px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd;padding-bottom:16px;margin-bottom:24px;">
-        <h1>Mail Inbox</h1>
-        <div style="display:flex;gap:12px;">
-            <!-- 训练入口：使用urls内合法别名 train_l1 / train_l2 / train_l3 -->
-            <a href="{% url 'train_l1' %}" style="padding:8px 16px;background:#165DFF;color:white;border-radius:6px;text-decoration:none;">Level 1 Basic Training</a>
-            <a href="{% url 'train_l2' %}" style="padding:8px 16px;border:1px solid #165DFF;color:#165DFF;border-radius:6px;text-decoration:none;">Level 2 Intermediate Training</a>
-            <a href="{% url 'train_l3' %}" style="padding:8px 16px;border:1px solid #165DFF;color:#165DFF;border-radius:6px;text-decoration:none;">Level 3 Advanced Training</a>
-        </div>
-    </div>
-
-    <!-- 收件箱空白提示 -->
-    <div style="text-align:center;padding:80px 0;color:#666;font-size:18px;">
-        <p>Your inbox has no new mails temporarily.</p>
-        <p style="margin-top:12px;">Click the buttons above to start phishing identification training practice.</p>
-    </div>
-
-    <!-- 底部导航 -->
-    <div style="margin-top:60px;text-align:center;">
-        <a href="{% url 'profile' %}" style="color:#165DFF;">← Back to Personal Center</a>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+.wrapper{
+    max-width:1400px;
+    margin:12px auto;
+    border:1px solid #c8c8c8;
+    border-radius:6px;
+    overflow:hidden;
+    display:grid;
+    grid-template-columns:190px 340px 1fr;
+    height:720px;
+}
+/* 左侧文件夹栏 */
+.sidebar-folder{
+    background:#f5f7fa;
+    border-right:1px solid #ddd;
+    padding:16px 8px;
+}
+.folder-item{
+    padding:9px 12px;
+    border-radius:5px;
+    cursor:pointer;
+    margin-bottom:4px;
+}
+.folder-item.active{
+    background:#d0e1ff;
+    color:#165DFF;
+    font-weight:bold;
+}
+/* 中间邮件列表 */
+.mail-list-panel{
+    border-right:1px solid #ddd;
+    overflow-y:auto;
+}
+.mail-item{
+    padding:14px 16px;
+    border-bottom:1px solid #eee;
+    cursor:pointer;
+}
+.mail-item:hover{background:#f3f7ff;}
+.mail-item.selected{background:#e8f0ff;}
+.mail-title{font-weight:500;font-size:16px;margin-bottom:4px;}
+.mail-sender{font-size:13px;color:#666;}
+/* 右侧预览面板 */
+.preview-panel{
+    padding:20px;
+    overflow-y:auto;
+}
+.empty-tip{
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#888;
+    font-size:18px;
+}
+.mail-head-info{
+    border-bottom:1px solid #ddd;
+    padding-bottom:16px;
+    margin-bottom:20px;
+}
+.operate-bar{
+    margin:24px 0;
+    display:flex;
+    gap:12px;
+}
+.action-btn{
+    padding:9px 16px;
+    border-radius:6px;
+    border:1px solid #165DFF;
+    background:#fff;
+    color:#165DFF;
+    cursor:pointer;
+}
+.action-btn.danger{
+    border-color:#dd4444;
+    color:#dd4444;
+}
+/* 训练页面内部标题栏 */
+.top-nav-bar{
+    max-width:1400px;
+    margin:0 auto 12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+</style>
+<div class="top-nav-bar">
+    <h2>Level 2 Intermediate Mail Simulation</h2>
+    <div>
+        <button onclick="finishSession()" style="padding:8px 16px;background:#008844;color:white;border:none;border-radius:6px;">End Training & Generate Report</button>
     </div>
 </div>
+<div class="wrapper">
+    <!-- 1.左侧文件夹导航 -->
+    <div class="sidebar-folder">
+        <div class="folder-item active" data-folder="inbox">📥 Inbox</div>
+        <div class="folder-item" data-folder="suspicious">⚠️ Suspicious Mails</div>
+        <div class="folder-item" data-folder="processed">✅ Processed</div>
+        <div class="folder-item" data-folder="deleted">🗑️ Deleted Items</div>
+    </div>
+    <!-- 2.中间邮件列表 -->
+    <div class="mail-list-panel" id="mailList">
+        {% for mail in mail_list %}
+        <div class="mail-item" data-mail-id="{{ mail.id }}">
+            <div class="mail-title">{{ mail.subject }}</div>
+            <div class="mail-sender">{{ mail.sender }}</div>
+        </div>
+        {% empty %}
+        <div style="padding:20px;color:#777;">No mails available for your department.</div>
+        {% endfor %}
+    </div>
+    <!-- 3.右侧邮件预览容器 -->
+    <div class="preview-panel" id="previewArea">
+        <div class="empty-tip">Select an email from list to preview</div>
+    </div>
+</div>
+<form id="endSessionForm" action="{% url 'finish_train_session' %}" method="POST" hidden>
+    {% csrf_token %}
+    <input type="hidden" name="session_id" value="{{ session.id }}">
+</form>
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+<script>
+let currentMailId = null;
+let currentFolder = "inbox";
+const mailFolderMap = {};
+const actionFolderMap = {
+    "mark_suspicious": "suspicious",
+    "delete_mail": "deleted",
+    "report_phish": "processed",
+    "mark_legit": "processed"
+};
+// 防重复提交链接标记
+let clickingLink = false;
+$(function(){
+    // 初始化所有邮件归属收件箱
+    $(".mail-item").each(function(){
+        const mid = $(this).data("mail-id");
+        mailFolderMap[mid] = "inbox";
+    })
+    // 左侧文件夹切换
+    $(".folder-item").click(function(){
+        currentFolder = $(this).data("folder");
+        $(".folder-item").removeClass("active");
+        $(this).addClass("active");
+        filterMailByFolder();
+        $("#previewArea").html(`<div class="empty-tip">Select an email from list to preview</div>`);
+    })
+    // 中间邮件点击加载详情
+    $(document).on("click", ".mail-item", function(){
+        const mailId = $(this).data("mail-id");
+        currentMailId = mailId;
+        $(".mail-item").removeClass("selected");
+        $(this).addClass("selected");
+        const tpl = "{% url 'l2_mail_detail' mail_id=9999 %}";
+        const url = tpl.replace("9999", mailId);
+        $.get(url, function(html){
+            $("#previewArea").html(html);
+        });
+    })
+    // 右侧操作按钮事件委托
+    $(document).on("click", "#previewArea .action-btn", function(){
+        const mailId = $(this).data("mid");
+        const actType = $(this).data("act");
+        runRecord(mailId, actType);
+    })
+    // 【邮件内链接点击 记录click_link，禁止跳转、防重复点击】
+    $("#previewArea").on("click", ".mail-body a", function(e){
+        e.preventDefault();
+        const mailId = currentMailId;
+        if (!mailId || clickingLink) return;
+        clickingLink = true;
+        $.post("{% url 'mail_action_save' %}", {
+            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+            session_id: "{{ session.id }}",
+            mail_id: mailId,
+            action: "click_link"
+        }).done(function(){
+            console.log("Link click behavior saved");
+        }).fail(function(err){
+            console.error("Failed to save link click", err);
+        }).always(()=>{
+            clickingLink = false;
+        });
+    });
+})
+// 过滤邮件显示
+function filterMailByFolder(){
+    $(".mail-item").each(function(){
+        const mid = $(this).data("mail-id");
+        if(mailFolderMap[mid] === currentFolder){
+            $(this).show();
+        }else{
+            $(this).hide();
+        }
+    })
+}
+// 封装提交操作（页面按钮：标记/删除/举报）
+function runRecord(mailId, actionType){
+    $.post("{% url 'mail_action_save' %}", {
+        csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+        session_id: "{{ session.id }}",
+        mail_id: mailId,
+        action: actionType
+    })
+    .done(()=>{
+        mailFolderMap[mailId] = actionFolderMap[actionType];
+        filterMailByFolder();
+        $("#previewArea").html(`<div class="empty-tip">Select an email from list to preview</div>`);
+    })
+    .fail(xhr=>{
+        console.error("操作失败", xhr.responseText);
+    })
+}
+// 结束训练弹窗
+function finishSession(){
+    const tip = "Once ended, you cannot continue operating emails. Confirm to submit all operation records and generate evaluation report?";
+    if(!confirm(tip)) return;
+    $("#endSessionForm").submit();
+}
+</script>
 {% endblock %}

@@ -1,0 +1,14 @@
+<div class="mail-head-info">
+    <div style="font-size:22px;font-weight:bold;margin-bottom:10px;">{{ template.subject }}</div>
+    <div>From: {{ template.sender }}</div>
+    <div>Sent to: {{ request.user.email }}</div>
+</div>
+<div class="mail-body">
+    {% include sub_template %}
+</div>
+<div class="operate-bar">
+    <button class="action-btn" data-mid="{{ template.id }}" data-act="mark_suspicious">Mark Suspicious</button>
+    <button class="action-btn" data-mid="{{ template.id }}" data-act="mark_legit">Mark Legitimate</button>
+    <button class="action-btn danger" data-mid="{{ template.id }}" data-act="delete_mail">Delete Mail</button>
+    <button class="action-btn" data-mid="{{ template.id }}" data-act="report_phish">Report Phishing</button>
+</div>

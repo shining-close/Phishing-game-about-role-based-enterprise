@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}L2 Training Evaluation Report{% endblock %}
+
+{% block content %}
+<style>
+    body{font-family:Arial;}
+    .pass{color:green;border:1px solid green;padding:12px;border-radius:8px;margin:20px 0;}
+    .fail{color:#c00;border:1px solid #c00;padding:12px;border-radius:8px;margin:20px 0;}
+    .plus{color:green;font-weight:bold;}
+    .minus{color:red;font-weight:bold;}
+    table{width:100%;border-collapse:collapse;margin-top:20px;}
+    th,td{border:1px solid #ccc;padding:10px;text-align:left;}
+    th{background:#f5f5f5;}
+</style>
+
+<h1>L2 Training Evaluation Report</h1>
+<hr>
+<p>Total available positive score: {{ total_add }}</p>
+<p>Total penalty deduction: {{ total_minus }}</p>
+<p><strong>Final Score: {{ final_score }} / 30</strong></p>
+<p>Correctly identified emails: {{ session.correct_identify }}</p>
+<p>Misjudged emails: {{ session.wrong_identify }}</p>
+
+{% if session.pass_level2 %}
+<div class="pass">
+    ✅ Pass! Your final score reaches 30. Level 3 training is unlocked.
+    <br><a href="{% url 'train_l3' %}">Go to Level 3 Training</a>
+</div>
+{% else %}
+<div class="fail">
+    ❌ Not passed. Your final score needs to reach 30 to unlock Level 3.
+    <br><a href="{% url 'train_l2' %}">Restart Level 2 Training</a>
+</div>
+{% endif %}
+
+<h3>Detailed Operation & Score Log</h3>
+<table>
+    <tr>
+        <th>Time</th>
+        <th>Your Operation</th>
+        <th>Email Subject</th>
+        <th>Real Mail Type</th>
+        <th>Score Change</th>
+        <th>Explanation</th>
+    </tr>
+    {% for item in detail_list %}
+    <tr>
+        <td>{{ item.time }}</td>
+        <td>{{ item.action_name }}</td>
+        <td>{{ item.mail_title }}</td>
+        <td>{{ item.mail_type }}</td>
+        <td>
+            {% if item.delta > 0 %}
+                <span class="plus">+{{ item.delta }}</span>
+            {% elif item.delta < 0 %}
+                <span class="minus">{{ item.delta }}</span>
+            {% else %}
+                0
+            {% endif %}
+        </td>
+        <td>{{ item.reason }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

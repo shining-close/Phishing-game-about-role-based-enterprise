@@ -1,11 +1,19 @@
-{% extends "base.html" %}
-{% block content %}
-<div style="text-align:center;margin-top:100px;">
-    <h2 style="color:#009944;">You have finished all 5 training questions!</h2>
-    <p style="margin:20px 0;">Your judgment records have been saved to your error training records.</p>
-    <div style="display:flex;gap:20px;justify-content:center;">
-        <a href="{% url 'train_l1' %}">Re-do Level 1 Training</a>
-        <a href="{% url 'profile' %}">View My Error Records</a>
-    </div>
+<div class="result-box">
+    <h2>L2训练完成报告</h2>
+    <p>本次训练总邮件：10封</p>
+    <p>正确识别钓鱼邮件：{{ session.correct_identify }} 封</p>
+    <p>误判正常邮件：{{ session.wrong_identify }} 封</p>
+    <p>综合得分：{{ session.score }} / 30</p>
+
+    {% if session.pass_level2 %}
+        <div style="color:green;font-size:18px;margin:20px 0;">
+            ✅ 达标！你正确辨别邮件数量达到7封以上，已解锁Level 3高级训练入口
+        </div>
+        <a href="{% url 'train_l3' %}">前往Level 3训练</a>
+    {% else %}
+        <div style="color:red;font-size:18px;margin:20px 0;">
+            ❌ 未达标，正确辨别不足7封，无法进入Level 3，请重新完成L2训练
+        </div>
+        <a href="{% url 'train_l2' %}">重新训练Level 2</a>
+    {% endif %}
 </div>
-{% endblock %}

@@ -19,22 +19,28 @@ hr{
     width:75%;
     margin:0 auto 45px;
 }
-/* 关键：弹性布局，两端分散对齐、水平居中 */
 .button-row{
     display:flex;
-    justify-content: space-evenly; /* 按钮分散均匀分布 */
-    max-width:700px;
+    justify-content: space-evenly;
+    gap:20px;
+    max-width:900px;
     margin:0 auto;
+    flex-wrap: wrap;
 }
 .btn-blue{
     display:block;
     padding:16px 36px;
-    background:#0052cc; /* 和你截图深蓝色按钮一致 */
+    background:#a1bf88;
     color:#fff;
     font-size:20px;
     border-radius:10px;
     text-decoration:none;
     white-space:nowrap;
+    border:none;
+    cursor:pointer;
+}
+.btn-blue:hover{
+    background:#8ca873;
 }
 .btn-grey{
     display:block;
@@ -45,6 +51,19 @@ hr{
     border-radius:10px;
     text-decoration:none;
     white-space:nowrap;
+    border:none;
+    cursor:pointer;
+}
+.btn-disabled{
+    display:block;
+    padding:16px 36px;
+    background:#cccccc;
+    color:#666666;
+    font-size:20px;
+    border-radius:10px;
+    white-space:nowrap;
+    border:none;
+    cursor:not-allowed;
 }
 .desc-text{
     max-width:850px;
@@ -53,21 +72,47 @@ hr{
     color:#555;
     line-height:1.7;
 }
+.tip-text{
+    width:100%;
+    margin-top:10px;
+    color:#993333;
+    font-size:16px;
+}
 </style>
-
 <div class="wrap">
     <h1>Welcome to Enterprise Phishing Simulation Training Platform</h1>
     <p class="subtitle">Gamified anti-phishing test for HR, Finance and IT departments</p>
     <hr>
 
+    {% if not user.is_authenticated %}
+    <!-- 未登录界面：注册、登录 -->
     <div class="button-row">
         <a href="{% url 'register' %}" class="btn-blue">Register New Trainee Account</a>
         <a href="{% url 'login' %}" class="btn-grey">Sign In to System</a>
     </div>
+    {% else %}
+    <!-- 已登录：训练功能入口 -->
+    <div class="button-row">
+        {% if not has_pretest %}
+            <a href="{% url 'pretest_start' %}" class="btn-blue">Start Pre-Test (Baseline Assessment)</a>
+            <button class="btn-disabled">Level 1 Training (Locked)</button>
+            <button class="btn-disabled">Level 2 Training (Locked)</button>
+            <p class="tip-text">Complete baseline pre-test to unlock intermediate training</p>
+        {% else %}
+            <a href="{% url 'train_l2' %}" class="btn-blue">Enter Level 1 Intermediate Training</a>
+            {% if can_l3 %}
+                <a href="{% url 'train_l3' %}" class="btn-blue">Enter Level 2 Advanced Training</a>
+            {% else %}
+                <button class="btn-disabled">Level 2 Training Locked<br>Current L1 Total: {{ l2_total }} / 30 Points</button>
+            {% endif %}
+            <a href="{% url 'profile' %}" class="btn-grey">Personal Center</a>
+        {% endif %}
+    </div>
+    {% endif %}
 
     <div class="desc-text">
         <p>This platform provides role-isolated phishing simulation scenes. Each employee can only view training emails matched to their department: Human Resources, Finance Department, IT Department.</p>
-        <p>Complete the email judgement game to improve your ability to identify scam emails.</p>
+        <p>System process: Complete baseline pre-test → Unlock Level2 training → Accumulate 30 L2 total points to unlock advanced Level3 simulation inbox.</p>
     </div>
 </div>
 {% endblock %}
