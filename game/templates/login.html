@@ -1,10 +1,89 @@
 {% extends 'base.html' %}
 {% block title %}System Login{% endblock %}
 {% block content %}
-<h2>Login to Anti-Phishing Serious Game Platform</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Sign In</button>
-</form>
+<style>
+.wrap{
+    display:flex;
+    justify-content:center;
+    margin-top:70px;
+}
+.login-card{
+    width:540px;
+    background:#ffffff;
+    border-radius:14px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    padding:45px 40px;
+}
+.login-title{
+    text-align:center;
+    font-size:32px;
+    margin-bottom:36px;
+    font-weight:500;
+}
+.form-item{
+    margin-bottom:22px;
+}
+.form-item label{
+    display:block;
+    font-size:17px;
+    margin-bottom:8px;
+}
+.form-item input{
+    width:100%;
+    box-sizing:border-box;
+    font-size:18px;
+    padding:10px 14px;
+    border:1px solid #dcdfe6;
+    border-radius:8px;
+}
+.form-item input::placeholder{
+    color:#b0b4bc;
+}
+.btn-login{
+    width:100%;
+    padding:14px;
+    background:#a1bf88;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:20px;
+    cursor:pointer;
+}
+.btn-login:hover{
+    background:#8ca873;
+}
+.error-tip{
+    text-align:center;
+    color:#dd3333;
+    margin-bottom:18px;
+    font-size:16px;
+}
+</style>
+
+<div class="wrap">
+    <div class="login-card">
+        <h2 class="login-title">Login to Anti-Phishing Serious Game Platform</h2>
+
+        {% if form.errors %}
+        <div class="error-tip">
+            Username or password is incorrect, please try again
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-item">
+                <label>Username:</label>
+                {{ form.username }}
+            </div>
+            <div class="form-item">
+                <label>Password:</label>
+                {{ form.password }}
+            </div>
+            <div class="form-item">
+                <button class="btn-login" type="submit">Sign In</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

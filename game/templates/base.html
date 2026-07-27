@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>{% block title %}Enterprise Anti-Phishing Training Platform{% endblock %}</title>
 <style>
 .container { width: 90%; margin: 30px auto; }
 nav {
-    background: #0052cc;
+    background: #a1bf88;
     padding: 14px 24px;
     display: flex;
     justify-content: space-between;
@@ -39,11 +42,11 @@ nav {
     <!-- 左侧固定导航 -->
     <div class="nav-left">
     {% if user.is_authenticated %}
-        <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'inbox' %}">My Role-Specific Inbox</a>
+        <!-- <a href="{% url 'home' %}">Home</a> -->
+        <a href="{% url 'inbox' %}">Inbox</a>
     {% else %}
         <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'register' %}">New User Registration</a>
+        <a href="{% url 'register' %}">Registration</a>
     {% endif %}
     </div>
 

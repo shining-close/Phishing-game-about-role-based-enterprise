@@ -1,10 +1,129 @@
 {% extends 'base.html' %}
 {% block title %}Create New Trainee Account{% endblock %}
 {% block content %}
-<h2>Employee Registration - Select Your Job Role</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Complete Registration</button>
-</form>
+<style>
+.wrap{
+    display:flex;
+    justify-content:center;
+    margin-top:70px;
+}
+.register-card{
+    width:540px;
+    background:#ffffff;
+    border-radius:14px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    padding:45px 40px;
+}
+.register-title{
+    text-align:center;
+    font-size:36px;
+    margin-bottom:36px;
+    font-weight:500;
+}
+.form-item{
+    margin-bottom:22px;
+}
+.form-item label{
+    display:block;
+    font-size:22px;
+    margin-bottom:10px;
+}
+.form-item input, .form-item select{
+    width:100%;
+    box-sizing:border-box;
+    font-size:20px;
+    padding:14px 16px;
+    border:1px solid #dcdfe6;
+    border-radius:12px;
+    background:#fff;
+}
+.form-item input::placeholder{
+    color:#b0b4bc;
+}
+/* 目标绿色按钮 */
+.btn-submit{
+    width:100%;
+    padding:16px;
+    background:#a1bf88;
+    color:#ffffff;
+    border:none;
+    border-radius:12px;
+    font-size:24px;
+    cursor:pointer;
+}
+.btn-submit:hover{
+    background:#8ca873;
+}
+.error-tip{
+    color:#dd3333;
+    text-align:center;
+    margin-bottom:24px;
+    font-size:18px;
+}
+.field-error{
+    color:#dd3333;
+    font-size:16px;
+    margin-top:6px;
+}
+</style>
+
+<div class="wrap">
+    <div class="register-card">
+        <h2 class="register-title">Employee Registration - Select Your Job Role</h2>
+
+        {% if form.errors %}
+        <div class="error-tip">
+            Please check your information and fix the errors below
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-item">
+                <label>Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <div class="field-error">{{ form.username.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-item">
+                <label>Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div class="field-error">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-item">
+                <label>Password</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                <div class="field-error">{{ form.password.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-item">
+                <label>Confirm Password</label>
+                {{ form.password_confirm }}
+                {% if form.password_confirm.errors %}
+                <div class="field-error">{{ form.password_confirm.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-item">
+                <label>Department / Role</label>
+                {{ form.role }}
+                {% if form.role.errors %}
+                <div class="field-error">{{ form.role.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-item">
+                <button class="btn-submit" type="submit">Complete Registration</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

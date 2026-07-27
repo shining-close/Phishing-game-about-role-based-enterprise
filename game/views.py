@@ -42,8 +42,10 @@ def register_view(request):
 
 # User login page
 def login_view(request):
+    # 如果已经登录，直接跳转到inbox，不让进入登录页
     if request.user.is_authenticated:
         return redirect("inbox")
+
     login_form = LoginForm()
     if request.method == "POST":
         login_form = LoginForm(request, data=request.POST)
@@ -51,6 +53,7 @@ def login_view(request):
             login_user = login_form.get_user()
             login(request, login_user)
             return redirect("inbox")
+
     return render(request, "login.html", {"form": login_form})
 
 # Logout function: clear session and redirect to login page
