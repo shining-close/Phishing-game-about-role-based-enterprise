@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Level3: Create Department Related Phishing Email</h3>
+    <p class="text-secondary">You can only create emails for your department: <strong>{{ user_dept|upper }}</strong></p>
+    <hr>
+    <form action="{% url 'submit_user_created_mail' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Sender</label>
+            <input type="text" class="form-control" name="sender" required>
+        </div>
+        <div class="mb-3">
+            <label>Email Subject</label>
+            <input type="text" class="form-control" name="subject" required>
+        </div>
+        <div class="mb-3">
+            <label>Email Type</label>
+            <select class="form-select" name="email_label">
+                <option value="phish">Phishing Email</option>
+                <option value="legit">Legitimate Email</option>
+            </select>
+        </div>
+
+        <!-- 移除难度下拉，后端固定difficulty_level=2 -->
+
+        <div style="margin:12px 0;">
+            <label>Select Template File</label><br>
+            <select name="template_type" required>
+                <option value="">-- Please Choose Template --</option>
+                <!-- 只保留L2三个模板，删除L3选项 -->
+                <option value="L2_1">L2 Template 1</option>
+                <option value="L2_2">L2 Template 2</option>
+                <option value="L2_3">L2 Template 3</option>
+            </select>
+        </div>
+
+        <h5>Email Content</h5>
+        <!-- 新增Link Text输入框 -->
+        <div class="mb-3">
+            <label>Paragraph 1</label>
+            <textarea class="form-control" rows="3" name="content_1"></textarea>
+        </div>
+        <div class="mb-3">
+            <label>Link Display Text 1</label>
+            <input class="form-control" placeholder="e.g. Click to verify account" name="link_text_1">
+        </div>
+        <div class="mb-3">
+            <label>Hidden Fake URL 1</label>
+            <input class="form-control" placeholder="https://fake-domain.com" name="url_1">
+        </div>
+
+        <div class="mb-3">
+            <label>Paragraph 2</label>
+            <textarea class="form-control" rows="3" name="content_2"></textarea>
+        </div>
+        <div class="mb-3">
+            <label>Link Display Text 2</label>
+            <input class="form-control" name="link_text_2">
+        </div>
+        <div class="mb-3">
+            <label>Hidden Fake URL 2</label>
+            <input class="form-control" name="url_2">
+        </div>
+
+        <div class="mb-3">
+            <label>Paragraph 3</label>
+            <textarea class="form-control" rows="3" name="content_3"></textarea>
+        </div>
+        <div class="mb-3">
+            <label>Link Display Text 3</label>
+            <input class="form-control" name="link_text_3">
+        </div>
+        <div class="mb-3">
+            <label>Hidden Fake URL 3</label>
+            <input class="form-control" name="url_3">
+        </div>
+
+        <div class="mb-3">
+            <label>Paragraph 4</label>
+            <textarea class="form-control" rows="3" name="content_4"></textarea>
+        </div>
+        <div class="mb-3">
+            <label>Link Display Text 4</label>
+            <input class="form-control" name="link_text_4">
+        </div>
+        <div class="mb-3">
+            <label>Hidden Fake URL 4</label>
+            <input class="form-control" name="url_4">
+        </div>
+
+        <div class="mb-3">
+            <label>Scam Keywords (split by comma)</label>
+            <input type="text" class="form-control" name="scam_keywords">
+        </div>
+        <div class="mb-3">
+            <label>Analysis Description (Feedback text for trainee)</label>
+            <textarea class="form-control" rows="4" name="analysis_description" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit for Admin Review</button>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

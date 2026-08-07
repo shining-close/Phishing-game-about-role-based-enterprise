@@ -1,37 +1,79 @@
-{% comment %}删除所有extends、block标签，只留纯邮件正文HTML{% endcomment %}
+<style>
+    .fake-link-box {
+        position: relative;
+        display: inline-block;
+        color: #0066cc;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    .real-url-tip {
+        visibility: hidden;
+        opacity: 0;
+        position: absolute;
+        left: 0;
+        top: 28px;
+        background: #222;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size:13px;
+        white-space: nowrap;
+        z-index: 99;
+        transition: opacity 0.2s;
+    }
+    .fake-link-box:hover .real-url-tip {
+        visibility: visible;
+        opacity:1;
+    }
+</style>
+
 {% if template.content_1 %}
 <p>{{ template.content_1 }}</p>
+{% endif %}
 {% if template.url_1 %}
-<p class="fake-link">
-    <a href="#" onclick="recordAction({{ template.id }}, 'click_link')">{{ template.url_1 }}</a>
-    <span class="link-tip">{{ template.url_1 }}</span>
+<p>
+<span class="fake-link-box" onclick="recordAction({{ template.id }},'click_link')">
+    {{ template.link_text_1|default:"Click Here" }}
+    <span class="real-url-tip">{{ template.url_1 }}</span>
+</span>
 </p>
 {% endif %}
-{% endif %}
+
+
 {% if template.content_2 %}
 <p>{{ template.content_2 }}</p>
+{% endif %}
 {% if template.url_2 %}
-<p class="fake-link">
-    <a href="#" onclick="recordAction({{ template.id }}, 'click_link')">{{ template.url_2 }}</a>
-    <span class="link-tip">{{ template.url_2 }}</span>
+<p>
+<span class="fake-link-box" onclick="recordAction({{ template.id }},'click_link')">
+    {{ template.link_text_2|default:"Click Here" }}
+    <span class="real-url-tip">{{ template.url_2 }}</span>
+</span>
 </p>
 {% endif %}
-{% endif %}
+
+
 {% if template.content_3 %}
 <p>{{ template.content_3 }}</p>
+{% endif %}
 {% if template.url_3 %}
-<p class="fake-link">
-    <a href="#" onclick="recordAction({{ template.id }}, 'click_link')">{{ template.url_3 }}</a>
-    <span class="link-tip">{{ template.url_3 }}</span>
+<p>
+<span class="fake-link-box" onclick="recordAction({{ template.id }},'click_link')">
+    {{ template.link_text_3|default:"Click Here" }}
+    <span class="real-url-tip">{{ template.url_3 }}</span>
+</span>
 </p>
 {% endif %}
-{% endif %}
+
+
 {% if template.content_4 %}
 <p>{{ template.content_4 }}</p>
-{% if template.url_4 %}
-<p class="fake-link">
-    <a href="#" onclick="recordAction({{ template.id }}, 'click_link')">{{ template.url_4 }}</a>
-    <span class="link-tip">{{ template.url_4 }}</span>
-</p>
 {% endif %}
+{% if template.url_4 %}
+<p>
+<span class="fake-link-box" onclick="recordAction({{ template.id }},'click_link')">
+    {{ template.link_text_4|default:"Click Here" }}
+    <span class="real-url-tip">{{ template.url_4 }}</span>
+</span>
+</p>
 {% endif %}

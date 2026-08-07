@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}My Created Emails & Audit Status{% endblock %}
+{% block content %}
+<h1>My Created Emails & Audit Status</h1>
+<table border="1" cellpadding="12" style="width:100%;border-collapse:collapse;margin:20px 0;">
+    <tr style="background:#f5f5f5;">
+        <th>Email Subject</th>
+        <th>Department</th>
+        <th>Submit Time</th>
+        <th>Audit Status</th>
+        <th>Feedback</th>
+    </tr>
+    {% for item in page_data.object_list %}
+    <tr>
+        <td>
+            <a href="{% url 'user_submit_mail_detail' item.pk %}">
+                {{ item.email_template.subject }}
+            </a>
+        </td>
+        <td>{{ item.email_template.department|upper }}</td>
+        <td>{{ item.submit_time }}</td>
+        <td>
+            {% if item.status == "pending" %}
+                Pending Review
+            {% elif item.status == "approved" %}
+                Approved (Available in L2 training)
+            {% else %}
+                Rejected
+            {% endif %}
+        </td>
+        <td>
+            {% if item.reject_note %}
+                {{ item.reject_note }}
+            {% else %}
+                --
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" style="text-align:center;color:#777;">You have not submitted any custom emails yet.</td></tr>
+    {% endfor %}
+</table>
+<!-- 分页控件，和错题页面完全一致 -->
+<div style="margin:20px 0;">
+    {% if page_data.has_previous %}
+        <a href="?page={{ page_data.previous_page_number }}">Previous Page</a>
+    {% endif %}
+    <span style="margin:0 12px;">Page {{ page_data.number }} / {{ page_data.paginator.num_pages }}</span>
+    {% if page_data.has_next %}
+        <a href="?page={{ page_data.next_page_number }}">Next Page</a>
+    {% endif %}
+</div>
+<a href="{% url 'profile' %}">← Back to Personal Center</a>
+{% endblock %}

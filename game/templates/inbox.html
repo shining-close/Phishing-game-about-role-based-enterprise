@@ -1,11 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Level 2 Intermediate Training | Outlook Mail Simulator{% endblock %}
-
+{% block title %}
+{% if diff == 2 %}
+Level 2 Intermediate Training | Outlook Mail Simulator
+{% else %}
+Level 3 Advanced Training | Anti-Phishing Confrontation Simulation
+{% endif %}
+{% endblock %}
 {# 隐藏base里的全局导航栏，DOM保留不破坏布局 #}
 {% block top_nav %}
 <div style="display: none;"></div>
 {% endblock %}
-
 {% block content %}
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -92,11 +96,31 @@
     display:flex;
     justify-content:space-between;
     align-items:center;
+    gap:16px;
+}
+.btn-create{
+    padding:8px 16px;
+    background:#28a745;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
 }
 </style>
 <div class="top-nav-bar">
-    <h2>Level 2 Intermediate Mail Simulation</h2>
-    <div>
+    <h2>
+        {% if diff == 2 %}
+        Level 2 Intermediate Mail Simulation
+        {% else %}
+        Level 3 Advanced Confrontation Mail Simulation
+        {% endif %}
+    </h2>
+    <div style="display:flex; gap:12px; align-items:center;">
+        {% if diff == 3 %}
+        <a href="{% url 'level3_editor' %}">
+            <button class="btn-create">Create Department Phishing Email(L3)</button>
+        </a>
+        {% endif %}
         <button onclick="finishSession()" style="padding:8px 16px;background:#008844;color:white;border:none;border-radius:6px;">End Training & Generate Report</button>
     </div>
 </div>

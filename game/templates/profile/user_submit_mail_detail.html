@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Submitted Email Detail{% endblock %}
+{% block content %}
+<h1>Your Submitted Email Detail</h1>
+
+<!-- 系统自动打分区域 -->
+<h3 style="margin-top:10px;color:#2c5282;">Auto Evaluation Score Report</h3>
+<table border="1" cellpadding="10" style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+    <tr style="background:#f5f5f5;">
+        <th style="width:300px;">Department Matching Score (0-30)</th>
+        <td>{{ record.score_dept_match }}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Social Engineering Induce Score (0-30)</th>
+        <td>{{ record.score_social_engineer }}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Fake Link & Sender Tech Score (0-25)</th>
+        <td>{{ record.score_fake_tech }}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Flaw Concealment Score (0-15)</th>
+        <td>{{ record.score_flaw }}</td>
+    </tr>
+    <tr style="background:#e9f2ff;font-weight:bold;">
+        <th>Total Score</th>
+        <td>{{ record.total_score }} / 100</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Comprehensive Grade</th>
+        <td>{{ record.level_grade }}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Optimization Suggestions</th>
+        <td style="white-space:pre-line;">{{ record.score_suggest }}</td>
+    </tr>
+</table>
+
+<!-- 邮件基础信息表格 -->
+<table border="1" cellpadding="12" style="width:100%;border-collapse:collapse;margin:20px 0;">
+    <tr style="background:#f5f5f5;">
+        <th style="width:220px;">Submit Time</th>
+        <td>{{ record.submit_time }}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Audit Status</th>
+        <td>
+            {% if record.status == "pending" %}Pending Review
+            {% elif record.status == "approved" %}Approved (Available for Training)
+            {% else %}Rejected{% endif %}
+        </td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Admin Feedback / Reject Note</th>
+        <td>{% if record.reject_note %}{{ record.reject_note }}{% else %}No feedback yet{% endif %}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Email Sender</th>
+        <td>{{ mail.sender }}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Email Subject</th>
+        <td>{{ mail.subject }}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Target Department</th>
+        <td>{{ mail.department|upper }}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Training Difficulty</th>
+        <td>Level {{ mail.difficulty_level }}
+            {% if mail.difficulty_level == 2 %}Intermediate{% else %}Advanced{% endif %}
+        </td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Selected Template File</th>
+        <td>{{ mail.get_template_type_display }}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Email Type</th>
+        <td>{{ mail.get_email_label_display }}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Scam Keywords</th>
+        <td>{% if mail.scam_keywords %}{{ mail.scam_keywords }}{% else %}--{% endif %}</td>
+    </tr>
+    <tr style="background:#f5f5f5;">
+        <th>Analysis Description</th>
+        <td>{{ mail.analysis_description }}</td>
+    </tr>
+</table>
+
+<h3 style="margin-top:30px;">Email Full Content</h3>
+<style>
+    .url-tip-wrap {
+        position: relative;
+        display: inline-block;
+        color:#0066cc;
+        text-decoration:underline;
+    }
+    .real-url-tip {
+        visibility:hidden;
+        opacity:0;
+        position:absolute;
+        top:26px;
+        left:0;
+        background:#222;
+        color:#fff;
+        padding:4px 8px;
+        font-size:12px;
+        white-space:nowrap;
+        transition:opacity 0.2s;
+        z-index:99;
+    }
+    .url-tip-wrap:hover .real-url-tip {
+        visibility:visible;
+        opacity:1;
+    }
+</style>
+<table border="1" cellpadding="12" style="width:100%;border-collapse:collapse;">
+    {% if mail.content_1 %}
+    <tr>
+        <th style="width:180px;background:#f5f5f5;">Paragraph 1</th>
+        <td>{{ mail.content_1|safe }}</td>
+    </tr>
+    {% endif %}
+    {% if mail.link_text_1 or mail.url_1 %}
+    <tr>
+        <th style="background:#f5f5f5;">Link 1 (Hover to view real URL)</th>
+        <td>
+            <span class="url-tip-wrap">
+                {{ mail.link_text_1|default:"Click Link" }}
+                <span class="real-url-tip">{{ mail.url_1 }}</span>
+            </span>
+        </td>
+    </tr>
+    {% endif %}
+
+    {% if mail.content_2 %}
+    <tr>
+        <th style="background:#f5f5f5;">Paragraph 2</th>
+        <td>{{ mail.content_2|safe }}</td>
+    </tr>
+    {% endif %}
+    {% if mail.link_text_2 or mail.url_2 %}
+    <tr>
+        <th style="background:#f5f5f5;">Link 2 (Hover to view real URL)</th>
+        <td>
+            <span class="url-tip-wrap">
+                {{ mail.link_text_2|default:"Click Link" }}
+                <span class="real-url-tip">{{ mail.url_2 }}</span>
+            </span>
+        </td>
+    </tr>
+    {% endif %}
+
+    {% if mail.content_3 %}
+    <tr>
+        <th style="background:#f5f5f5;">Paragraph 3</th>
+        <td>{{ mail.content_3|safe }}</td>
+    </tr>
+    {% endif %}
+    {% if mail.link_text_3 or mail.url_3 %}
+    <tr>
+        <th style="background:#f5f5f5;">Link 3 (Hover to view real URL)</th>
+        <td>
+            <span class="url-tip-wrap">
+                {{ mail.link_text_3|default:"Click Link" }}
+                <span class="real-url-tip">{{ mail.url_3 }}</span>
+            </span>
+        </td>
+    </tr>
+    {% endif %}
+
+    {% if mail.content_4 %}
+    <tr>
+        <th style="background:#f5f5f5;">Paragraph 4</th>
+        <td>{{ mail.content_4|safe }}</td>
+    </tr>
+    {% endif %}
+    {% if mail.link_text_4 or mail.url_4 %}
+    <tr>
+        <th style="background:#f5f5f5;">Link 4 (Hover to view real URL)</th>
+        <td>
+            <span class="url-tip-wrap">
+                {{ mail.link_text_4|default:"Click Link" }}
+                <span class="real-url-tip">{{ mail.url_4 }}</span>
+            </span>
+        </td>
+    </tr>
+    {% endif %}
+</table>
+
+<div style="margin-top:25px;">
+    <a href="{% url 'my_submit_mail_list' %}">← Back to My Created Emails List</a>
+</div>
+{% endblock %}

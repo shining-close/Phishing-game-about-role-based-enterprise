@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Audit User Created Email</h3>
+    <hr>
+    <div class="card p-3 mb-4">
+        <h5>Email Preview</h5>
+        <p><strong>Sender:</strong> {{ mail.sender }}</p>
+        <p><strong>Subject:</strong> {{ mail.subject }}</p>
+        <p><strong>Department:</strong> {{ mail.department|upper }}</p>
+        <p><strong>Type:</strong>
+            {% if mail.email_label == "phish" %}Phishing{% else %}Legitimate{% endif %}
+        </p>
+        <hr>
+        <p>{{ mail.content_1 }}</p>
+        {% if mail.url_1 %}<p>URL: {{ mail.url_1 }}</p>{% endif %}
+        <p>{{ mail.content_2 }}</p>
+        {% if mail.url_2 %}<p>URL: {{ mail.url_2 }}</p>{% endif %}
+        <p>{{ mail.content_3 }}</p>
+        {% if mail.url_3 %}<p>URL: {{ mail.url_3 }}</p>{% endif %}
+        <p>{{ mail.content_4 }}</p>
+        {% if mail.url_4 %}<p>URL: {{ mail.url_4 }}</p>{% endif %}
+        <hr>
+        <p><strong>Analysis Text:</strong><br>{{ mail.analysis_description }}</p>
+    </div>
+
+    {% if audit.status == "pending" %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Rejection Reason (Required if reject)</label>
+            <textarea class="form-control" name="reject_note"></textarea>
+        </div>
+        <button type="submit" name="action" value="approve" class="btn btn-success">Approve</button>
+        <button type="submit" name="action" value="reject" class="btn btn-danger">Reject</button>
+        <a href="{% url 'admin_email_audit_list' %}" class="btn btn-secondary">Back</a>
+    </form>
+    {% else %}
+    <div class="alert alert-info">
+        Status: {{ audit.status }}
+        {% if audit.reject_note %}<br>Feedback: {{ audit.reject_note }}{% endif %}
+    </div>
+    <a href="{% url 'admin_email_audit_list' %}" class="btn btn-secondary">Back to List</a>
+    {% endif %}
+</div>
+{% endblock %}

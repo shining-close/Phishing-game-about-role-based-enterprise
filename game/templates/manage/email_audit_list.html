@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>User Submitted Email Audit List</h3>
+    <hr>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Creator</th>
+                <th>Email Subject</th>
+                <th>Department</th>
+                <th>Submit Time</th>
+                <th>Status</th>
+                <th>Operation</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in page_data %}
+            <tr>
+                <td>{{ item.creator.username }}</td>
+                <td>{{ item.email_template.subject }}</td>
+                <td>{{ item.email_template.department|upper }}</td>
+                <td>{{ item.submit_time }}</td>
+                <td>
+                    {% if item.status == "pending" %}
+                    <span class="text-warning">Pending</span>
+                    {% elif item.status == "approved" %}
+                    <span class="text-success">Approved</span>
+                    {% else %}
+                    <span class="text-danger">Rejected</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'audit_single_user_mail' item.id %}" class="btn btn-sm btn-info">View & Process</a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6">No submitted emails waiting for audit.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <!--分页-->
+    <div>
+        {% if page_data.has_previous %}
+        <a href="?page={{ page_data.previous_page_number }}">Previous</a>
+        {% endif %}
+        Page {{ page_data.number }} / {{ page_data.paginator.num_pages }}
+        {% if page_data.has_next %}
+        <a href="?page={{ page_data.next_page_number }}">Next</a>
+        {% endif %}
+    </div>
+    <a href="{% url 'home' %}" class="btn btn-secondary mt-3">Back</a>
+</div>
+{% endblock %}

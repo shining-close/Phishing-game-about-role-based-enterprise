@@ -8,13 +8,15 @@ from .forms import RegisterForm, LoginForm, ChangePasswordForm, RoleApplyForm
 from .models import (
     EmailTemplateModel, Level2EmailTemplateModel,
     PreTestRecord, TrainSession, UserMailAction,
-    UserModel, RoleChangeApply
+    UserModel, RoleChangeApply, UserEmailAudit
 )
 from django.core.paginator import Paginator
 import random
 from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Max, OuterRef, Subquery, Q
+import json
+import re
 
 # Difine a decorator to restrict access to views based on user role
 def role_permit(allow_role):
@@ -61,9 +63,8 @@ def logout_view(request):
 @login_required
 def home_view(request):
     user = request.user
-    # 判断是否完成预测试
+    # 仅保留数据查询（报表/个人中心仍会用到，首页不再做锁定）
     has_pretest = PreTestRecord.objects.filter(user=user).exists()
-    # L3解锁状态
     can_l3 = user.unlock_l3
     l2_total = user.l2_total_points
     return render(request, "home.html", {
@@ -177,9 +178,10 @@ def train_l2_inbox(request):
     # 拉取当前用户部门 L2邮件：随机排序，一轮训练最多10封
     mail_queryset = Level2EmailTemplateModel.objects.filter(
         department=user.role,
-        difficulty_level=2
+        difficulty_level=2,
+        is_available=True  # 只加载审核通过可用邮件
     ).order_by("?")[:10]
-
+ 
     if not mail_queryset.exists():
         msg = "L2 training emails are empty, contact admin."
         return render(request, "train/error_tip.html", {"msg": msg})
@@ -223,6 +225,106 @@ def train_l3_inbox(request):
         "mail_list": mail_list,
         "diff": 3
     })
+
+# Lv3 用户创建钓鱼邮件编辑器入口
+@login_required
+def level3_editor(request):
+    user = request.user
+    # 双重校验：完成预测试 + L2积分达标解锁L3
+    if not PreTestRecord.objects.filter(user=user).exists():
+        messages.error(request, "Complete Pre-Test first before creating emails.")
+        return redirect("pretest_start")
+    if not user.unlock_l3:
+        messages.error(request, f"You need at least 30 L2 points to unlock Level3 creation, current: {user.l2_total_points}")
+        return redirect("home")
+    # 传给模板用户自身岗位，前端固定不可修改
+    return render(request, "train/l3/editor.html", {
+        "user_dept": user.role
+    })
+
+# L3提交自制邮件，进入管理员审核
+@login_required
+def submit_user_created_mail(request):
+    if request.method != "POST":
+        messages.error(request, "Invalid request method")
+        return redirect("level3_editor")
+    user = request.user
+    sender = request.POST.get("sender", "")
+    subject = request.POST.get("subject", "")
+    c1 = request.POST.get("content_1", "")
+    link_text_1 = request.POST.get("link_text_1", "")
+    u1 = request.POST.get("url_1", "")
+    c2 = request.POST.get("content_2", "")
+    link_text_2 = request.POST.get("link_text_2", "")
+    u2 = request.POST.get("url_2", "")
+    c3 = request.POST.get("content_3", "")
+    link_text_3 = request.POST.get("link_text_3", "")
+    u3 = request.POST.get("url_3", "")
+    c4 = request.POST.get("content_4", "")
+    link_text_4 = request.POST.get("link_text_4", "")
+    u4 = request.POST.get("url_4", "")
+    email_label = request.POST.get("phish", "")
+    scam_keywords = request.POST.get("scam_keywords", "")
+    analysis_desc = request.POST.get("analysis_description", "")
+
+    # 不再读取前端难度，直接固定为2
+    diff = 2
+    template_type = request.POST.get("template_type", "")
+    dept = user.role
+    source_type = "user_submit"
+
+    # 基础校验
+    if not sender or not subject:
+        messages.error(request, "Sender and Subject cannot be empty.")
+        return redirect("level3_editor")
+    # 移除难度数字校验，diff固定2无需判断
+    # 校验模板不能为空
+    if not template_type:
+        messages.error(request, "You must select a template file.")
+        return redirect("level3_editor")
+
+    # 创建邮件模板
+    new_mail = Level2EmailTemplateModel.objects.create(
+        sender=sender,
+        subject=subject,
+        content_1=c1,
+        link_text_1=link_text_1,
+        url_1=u1,
+        content_2=c2,
+        link_text_2=link_text_2,
+        url_2=u2,
+        content_3=c3,
+        link_text_3=link_text_3,
+        url_3=u3,
+        content_4=c4,
+        link_text_4=link_text_4,
+        url_4=u4,
+        difficulty_level=diff, # 固定2
+        template_type=template_type,
+        email_label=email_label,
+        department=dept,
+        scam_keywords=scam_keywords,
+        analysis_description=analysis_desc,
+        source=source_type
+    )
+    # 创建审核记录对象
+    audit_record = UserEmailAudit.objects.create(
+        creator=user,
+        email_template=new_mail
+    )
+    # 自动打分逻辑不变
+    s1, s2, s3, s4, total, grade, suggest = calc_phish_score(new_mail)
+    audit_record.score_dept_match = s1
+    audit_record.score_social_engineer = s2
+    audit_record.score_fake_tech = s3
+    audit_record.score_flaw = s4
+    audit_record.total_score = total
+    audit_record.level_grade = grade
+    audit_record.score_suggest = suggest
+    audit_record.save()
+
+    messages.success(request, "Your email draft has been submitted, waiting for administrator review.")
+    return redirect("my_submit_mail_list")
 
 # AJAX 保存用户操作行为（打开/标记/删除/点击链接）
 @login_required
@@ -395,15 +497,96 @@ def train_report(request, session_id):
         "final_score": final_score  # 传给模板使用
     })
 
-# ====================== 废弃旧答题训练整套视图（全部注释删除） ======================
-"""
-def train_level1_view(request):...
-def train_level2_view(request):...
-def train_level3_view(request):...
-def train_question(request, level, tpl_id):...
-def submit_game_record(request):...
-def train_complete(request):...
-"""
+def calc_phish_score(mail_obj):
+    """
+    输入 Level2EmailTemplateModel 对象，返回分项分数、总分、评级、优化建议
+    返回：(s1, s2, s3, s4, total, grade, suggest_text)
+    """
+    # 1. 词库定义
+    dept_keyword = {
+        "hr": ["salary", "interview", "contract", "resign", "attendance", "staff"],
+        "finance": ["invoice", "reimbursement", "payment", "budget", "tax", "fund"],
+        "it": ["account", "password", "system", "login", "server", "upgrade"]
+    }
+    social_engineer_words = {
+        "authority": ["administrator", "CEO", "manager", "official"],
+        "urgent": ["immediately", "urgent", "within 1 hour", "deadline"],
+        "fear_loss": ["account lock", "expire", "disable", "deduction"],
+        "benefit": ["bonus", "subsidy", "refund", "reward"]
+    }
+    forbidden_words = ["violence", "gambling", "porn", "hack", "fraud bank card"]
+
+    # 合并所有正文
+    all_content = f"{mail_obj.content_1} {mail_obj.content_2} {mail_obj.content_3} {mail_obj.content_4}".lower()
+    all_urls = [mail_obj.url_1, mail_obj.url_2, mail_obj.url_3, mail_obj.url_4]
+    sender = mail_obj.sender.lower()
+    target_dept = mail_obj.department
+
+    suggest_list = []
+
+    # ========== 维度1 岗位贴合 0-30 ==========
+    base_dept_score = 0
+    target_words = dept_keyword.get(target_dept, [])
+    hit = sum(1 for w in target_words if w in all_content)
+    base_dept_score = min(hit * 6, 30)
+    if hit == 0:
+        suggest_list.append(f"【岗位贴合】正文未出现{target_dept.upper()}业务关键词，场景匹配度低")
+    s1 = base_dept_score
+
+    # ========== 维度2 社会工程诱导 0-30 ==========
+    s2 = 0
+    for cat, words in social_engineer_words.items():
+        if any(w in all_content for w in words):
+            s2 += 7.5
+    s2 = min(s2, 30)
+    if s2 == 0:
+        suggest_list.append("【诱导设计】缺少权威、紧急、利益、损失类诱导话术，钓鱼吸引力不足")
+
+    # ========== 维度3 伪装技术 0-25 ==========
+    s3 = 0
+    # 发件人伪造判断
+    fake_sender_reg = re.compile(r"admin.*@qq|hr.*@163|ceo.*@gmail")
+    if fake_sender_reg.search(sender):
+        s3 += 12
+    # 仿冒URL判断
+    fake_domain_reg = re.compile(r"pay.*-verify|login-safe.*top")
+    url_hit = 0
+    for u in all_urls:
+        if u and fake_domain_reg.search(u):
+            url_hit += 1
+    s3 += min(url_hit * 6.5, 13)
+    s3 = min(s3, 25)
+    if not any(all_urls):
+        suggest_list.append("【伪装技术】未填写钓鱼链接，缺少核心钓鱼载体")
+
+    # ========== 维度4 破绽隐蔽度 0-15 ==========
+    s4 = 15
+    flaw_words = ["dear user", "click this link", "contact us immediately"]
+    flaw_count = sum(1 for w in flaw_words if w in all_content)
+    s4 -= flaw_count * 3
+    s4 = max(s4, 0)
+    if flaw_count > 0:
+        suggest_list.append(f"【破绽控制】检测到{flaw_count}处通用低级钓鱼话术，容易被识别")
+
+    # 违禁词直接清零
+    if any(word in all_content for word in forbidden_words):
+        s1 = s2 = s3 = s4 = 0
+        suggest_list.append("【违规警告】邮件包含违规敏感词汇，直接判定不合格")
+
+    total = round(s1 + s2 + s3 + s4, 1)
+
+    # 评级
+    if total >= 90:
+        grade = "Excellent"
+    elif total >=70:
+        grade = "Good"
+    elif total >=40:
+        grade = "Normal"
+    else:
+        grade = "Poor"
+
+    suggest_text = "\n".join(suggest_list) if suggest_list else "No optimization suggestions, well-designed phishing mail."
+    return s1, s2, s3, s4, total, grade, suggest_text
 
 # ====================== 个人中心、改密码、角色申请、管理员后台 ======================
 def is_admin(user):
@@ -529,6 +712,26 @@ def error_record_detail(request, action_id):
         "explain_text": explain_text
     })
 
+# 用户查看自己提交的所有待审核/已审核邮件
+@login_required
+def my_submit_mail_list(request):
+    user = request.user
+    audit_list = UserEmailAudit.objects.filter(creator=user).select_related("email_template")
+    paginator = Paginator(audit_list, 10)
+    page = request.GET.get("page", 1)
+    page_data = paginator.get_page(page)
+    return render(request, "profile/my_submit_mails.html", {"page_data": page_data})
+
+@login_required
+def user_submit_mail_detail(request, pk):
+    # 只能查看自己提交的审核单，防止越权
+    audit_record = get_object_or_404(UserEmailAudit, pk=pk, creator=request.user)
+    mail = audit_record.email_template
+    return render(request, "profile/user_submit_mail_detail.html", {
+        "record": audit_record,
+        "mail": mail
+    })
+
 # ====================== 管理员角色审核（逻辑微调，保留原有功能） ======================
 @login_required
 def admin_role_audit_list(request):
@@ -575,10 +778,44 @@ def admin_all_user_list(request):
     page_data = paginator.get_page(page_num)
     return render(request, "manage/all_user_list.html", {"page": page_data})
 
-# 旧GameRecord日志页面注释，不再使用
-"""
+# 管理员：所有用户提交邮件审核总列表
 @login_required
-def admin_all_game_logs(request):...
+def admin_email_audit_list(request):
+    if not is_admin(request.user):
+        messages.error(request, "Only administrators can access audit page.")
+        return redirect("home")
+    all_audit = UserEmailAudit.objects.all().select_related("creator", "email_template").order_by("-submit_time")
+    paginator = Paginator(all_audit, 15)
+    page = request.GET.get("page", 1)
+    page_data = paginator.get_page(page)
+    return render(request, "manage/email_audit_list.html", {"page_data": page_data})
+
+# 管理员审核单详情处理
 @login_required
-def user_error_record(request):...
-"""
+def audit_single_user_mail(request, audit_id):
+    if not is_admin(request.user):
+        messages.error(request, "Permission denied")
+        return redirect("home")
+    audit_obj = get_object_or_404(UserEmailAudit, id=audit_id)
+    mail_tpl = audit_obj.email_template
+    if request.method == "POST":
+        action = request.POST.get("action")
+        reject_note = request.POST.get("reject_note", "").strip()
+        audit_obj.auditor = request.user
+        audit_obj.audit_time = timezone.now()
+        if action == "approve":
+            audit_obj.status = "approved"
+            mail_tpl.is_available = True
+            mail_tpl.save()
+            messages.success(request, "Approved, this email will appear in L2 training pool.")
+        elif action == "reject":
+            if not reject_note:
+                messages.error(request, "Please fill in the rejection reason.")
+                return redirect("audit_single_user_mail", audit_id=audit_id)
+            audit_obj.status = "rejected"
+            audit_obj.reject_note = reject_note
+            # 驳回保持is_available=False，不进入训练池
+            messages.success(request, "Rejected successfully, user can view your feedback.")
+        audit_obj.save()
+        return redirect("admin_email_audit_list")
+    return render(request, "manage/email_audit_detail.html", {"audit": audit_obj, "mail": mail_tpl})

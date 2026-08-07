@@ -4,7 +4,22 @@
     <div>Sent to: {{ request.user.email }}</div>
 </div>
 <div class="mail-body">
-    {% include sub_template %}
+    {% if template.template_type %}
+        {% include sub_template %}
+    {% else %}
+        <!-- 用户自定义邮件，直接渲染字段，不再引入外部html片段 -->
+        {{ template.content_1|safe }}
+        {% if template.url_1 %}<a href="javascript:void(0)" class="mail-link">{{ template.url_1 }}</a>{% endif %}
+
+        {{ template.content_2|safe }}
+        {% if template.url_2 %}<a href="javascript:void(0)" class="mail-link">{{ template.url_2 }}</a>{% endif %}
+
+        {{ template.content_3|safe }}
+        {% if template.url_3 %}<a href="javascript:void(0)" class="mail-link">{{ template.url_3 }}</a>{% endif %}
+
+        {{ template.content_4|safe }}
+        {% if template.url_4 %}<a href="javascript:void(0)" class="mail-link">{{ template.url_4 }}</a>{% endif %}
+    {% endif %}
 </div>
 <div class="operate-bar">
     <button class="action-btn" data-mid="{{ template.id }}" data-act="mark_suspicious">Mark Suspicious</button>
