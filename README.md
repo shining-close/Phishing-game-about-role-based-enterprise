@@ -17,7 +17,7 @@ git clone https://github.com/shining-close/Phishing-game-about-role-based-enterp
 cd Phishing-game-about-role-based-enterprise
 
 ## 2. Create conda virtual environment
-conda create -n phishing_game python=3.11
+conda create -n phishing_game python=3.12
 conda activate phishing_game
 
 ## 3. Install dependencies
