@@ -13,3 +13,5 @@ packaging==26.0
 wheel==0.47.0
 gunicorn
 whitenoise
+dj-database-url
+psycopg2-binary

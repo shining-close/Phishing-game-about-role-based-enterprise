@@ -15,15 +15,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-+qhjck*l0zku0qt1=o1mey&rlohr(6ppv^kg55722efb))d5z9")
 
-
-if "PYTHONANYWHERE_DOMAIN" in os.environ:
-   
+if "RENDER" in os.environ:
+    
     DEBUG = False
-    ALLOWED_HOSTS = [os.environ.get("PYTHONANYWHERE_DOMAIN")]
+    ALLOWED_HOSTS = [os.environ.get("RENDER_EXTERNAL_HOSTNAME")]
 else:
-
+    
     DEBUG = True
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -33,7 +32,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     'game',
     'crispy_forms',
     "import_export",
@@ -43,7 +41,6 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -72,12 +69,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "phish_project.wsgi.application"
 
-if "PYTHONANYWHERE_DOMAIN" in os.environ:
+
+if "RENDER" in os.environ:
+    import dj_database_url
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True
+        )
     }
 else:
     DATABASES = {
@@ -90,6 +89,8 @@ else:
             'PORT': '3306',
         }
     }
+
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -118,7 +119,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 AUTH_USER_MODEL = 'game.UserModel'
-
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/inbox/'
-
