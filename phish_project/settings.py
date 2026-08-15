@@ -6,20 +6,25 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
+import os
 from pathlib import Path
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-+qhjck*l0zku0qt1=o1mey&rlohr(6ppv^kg55722efb))d5z9"
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-+qhjck*l0zku0qt1=o1mey&rlohr(6ppv^kg55722efb))d5z9")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False  
-
-# PythonAnywhere hosts
-ALLOWED_HOSTS = ["leavesfallfallfall.pythonanywhere.com"]
+# Environment distinction: turn off DEBUG for production, turn on for local development
+if "RENDER" in os.environ:
+    DEBUG = False
+    ALLOWED_HOSTS = [os.environ.get("RENDER_EXTERNAL_HOSTNAME")]
+else:
+    DEBUG = True
+    ALLOWED_HOSTS = []
 
 # Application definition
 INSTALLED_APPS = [
@@ -40,6 +45,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Static files middleware (required for Render)
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -67,26 +74,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "phish_project.wsgi.application"
 
-# ===================== DATABASE CONFIGURATION =====================
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'phish_db',
-#         'USER': 'root',        # MySQL account
-#         'PASSWORD': 'AEAEAEEOO',
-#         'HOST': '127.0.0.1',
-#         'PORT': '3306',
-#     }
-# }
-
-# SQLite configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Render: PostgreSQL，Local: MySQL
+if "RENDER" in os.environ:
+    DATABASES = {
+        "default": dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True
+        )
     }
-}
-# ==========================================================
+else:
+    # Mysql
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'phish_db',
+            'USER': 'root',        # MySQL account
+            'PASSWORD': 'AEAEAEEOO',
+            'HOST': '127.0.0.1',
+            'PORT': '3306',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -112,10 +119,10 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
+# Static file configuration is dedicated to Render
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Define the custom user model
 AUTH_USER_MODEL = 'game.UserModel'
