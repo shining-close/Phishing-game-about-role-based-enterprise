@@ -16,9 +16,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-+qhjck*l0zku0qt1=o1mey&rlohr(6ppv^kg55722efb))d5z9"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False  # 线上必须关闭
+DEBUG = False  
 
-# 替换成你的PythonAnywhere域名
+# PythonAnywhere hosts
 ALLOWED_HOSTS = ["leavesfallfallfall.pythonanywhere.com"]
 
 # Application definition
@@ -67,8 +67,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "phish_project.wsgi.application"
 
-# =====================数据库修改（重点！）=====================
-# 注释掉原来本地MySQL，换成SQLite（免费版最简单，不用配置MySQL）
+# ===================== DATABASE CONFIGURATION =====================
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
@@ -80,7 +79,7 @@ WSGI_APPLICATION = "phish_project.wsgi.application"
 #     }
 # }
 
-# 线上SQLite配置（直接使用）
+# SQLite configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -116,7 +115,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 STATIC_URL = "static/"
-# 新增线上静态文件收集目录（必须加）
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Define the custom user model
