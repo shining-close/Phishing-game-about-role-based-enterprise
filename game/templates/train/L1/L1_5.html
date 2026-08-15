@@ -1,4 +1,4 @@
-<!-- 发件人头部 -->
+
 <div class="mail-header">
     <div class="avatar-sender">{{ template.email_title|slice:":1" }}</div>
     <div class="sender-info">
@@ -7,9 +7,9 @@
         <div class="user-email">Sent to: {{ request.user.email }}</div>
     </div>
 </div>
-<!-- 邮件标题 -->
+
 <div class="mail-title">{{ template.email_title }}</div>
-<!-- 邮件正文+链接 -->
+
 <div class="mail-body">
     {{ template.email_content|linebreaks }}
     <div class="link-box">

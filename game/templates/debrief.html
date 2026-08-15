@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment Debriefing Statement</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f7fa;
+            color: #2d3748;
+            padding: 40px 15px;
+        }
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 48px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        h1 {
+            font-size: 30px;
+            color: #1a365d;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        hr {
+            border: none;
+            height: 2px;
+            background-color: #cbd5e0;
+            margin: 24px 0 36px;
+        }
+        h2 {
+            font-size: 20px;
+            color: #2c5282;
+            margin: 32px 0 14px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        p {
+            line-height: 1.8;
+            font-size: 16px;
+            margin-bottom: 16px;
+            text-align: justify;
+        }
+        .note {
+            margin-top: 40px;
+            padding: 22px;
+            border-radius: 8px;
+            border: 1px solid #bee3f8;
+            background: #ebf8ff;
+        }
+        .note strong {
+            color: #2c5282;
+            font-size: 17px;
+        }
+        .back-btn-wrap {
+            text-align: center;
+            margin-top: 36px;
+        }
+        .back-btn {
+            padding: 12px 32px;
+            font-size: 16px;
+            background-color: #2b6cb0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.25s ease;
+        }
+        .back-btn:hover {
+            background-color: #2c5282;
+        }
+        .contact-box {
+            background: #f7fafc;
+            padding: 18px;
+            border-radius: 6px;
+            margin: 10px 0 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Debriefing Statement</h1>
+    <hr>
+
+    <h2>Study Purpose</h2>
+    <p>
+        Thank you very much for completing our online email security experiment. This research aims to investigate how employees from different departments identify and respond to phishing emails under varying training difficulty levels. During the task, you were asked to judge a series of simulated legitimate and phishing emails, and your operational behaviours (marking, reporting, clicking links) were recorded to measure your phishing detection accuracy.
+    </p>
+    <p>
+        Prior to your participation, we did not fully disclose the core research questions to avoid biased decision-making during the test. Our primary hypothesis is that progressive interactive training can significantly improve participants’ ability to recognise malicious phishing communications and reduce risky click behaviours. All T0 baseline tests, L2 training sessions and T1 post-training assessments are designed to compare security awareness before and after training intervention.
+    </p>
+
+    <h2>What Data We Collected</h2>
+    <p>
+        We only collect anonymous behavioural data linked to your system account, with no real personal identifiers permanently stored in the database. Recorded information includes your email operation logs, judgement results, test scores, training session records and self-reported confidence ratings during T0 and T1 tests.
+    </p>
+    <p>
+        Your real full name submitted on the informed consent page is only temporarily stored in browser session data and will be completely deleted immediately after account registration; it will never be written into the formal research dataset or shared with any third party. All analytical results in the final dissertation will be aggregated statistics without individual user traceability.
+    </p>
+
+    <h2>Data Storage & Destruction</h2>
+    <p>
+        All experimental data will be securely stored on a local offline MySQL database for a maximum of 12 months after the completion of this research project. Once the master’s dissertation is submitted and assessed, all raw user records will be permanently erased from the database with no backup copies retained.
+    </p>
+    <p>
+        You reserve the full right to withdraw your experimental data from this research at any time without any negative consequences. If you wish to remove all your behavioural records, please contact the researcher via the email address provided below.
+    </p>
+
+    <h2>Contact Information</h2>
+    <div class="contact-box">
+        <p>If you have any questions, concerns or requests related to this study, research ethics or data withdrawal, please feel free to send an email to the student researcher. We will reply to your enquiry within three working days.</p><br>
+        <p><strong>Student Researcher:</strong> 3060584G@student.gla.ac.uk</p>
+        <p><strong>University:</strong> University of Glasgow</p>
+    </div>
+    <p>If you have any questions, concerns or requests related to this study, research ethics or data withdrawal, please feel free to send an email to the student researcher. We will reply to your enquiry within three working days.</p>
+
+    <div class="note">
+        <p><strong>You have now finished all experimental tasks. You may close this page or return to your personal dashboard at any time.</strong></p>
+    </div>
+
+    <div class="back-btn-wrap">
+        <a href="{% url 'home' %}">
+            <button class="back-btn">Return to Homepage</button>
+        </a>
+    </div>
+</div>
+</body>
+</html>

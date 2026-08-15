@@ -158,7 +158,8 @@
     opacity: 1;
     visibility: visible;
 }
-/* 置信度输入区域 */
+/* 置信度输入区域 —— 增加判断：L1不显示 */
+{% if template.test_difficulty != 1 %}
 .conf-box {
     margin: 30px 0;
     font-size: 18px;
@@ -166,21 +167,23 @@
 .conf-box input {
     padding:8px;font-size:16px;width:100px;margin-left:10px;
 }
+{% endif %}
 /* 结果弹窗 */
 .result-modal {
     display: none;
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.4);
-    z-index: 999;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(40,40,40,0.35);
+    z-index: 9999;
 }
 .modal-inner {
-    width: 900px;
+    box-sizing: border-box;
+    width: min(900px, 92%);
     background: white;
-    margin: 100px auto;
+    margin: 60px auto 0 auto;
     padding: 40px;
     border-radius: 12px;
 }
@@ -211,6 +214,31 @@
     font-size: 16px;
     cursor: pointer;
 }
+/* 页面底部白名单 */
+.page-footer-whitelist {
+    max-width: 900px;
+    margin: 20px auto 40px;
+    padding:12px 16px;
+    background:#f7f9fc;
+    border:1px solid #dde1e7;
+    border-radius:6;
+}
+.footer-title {
+    font-weight:bold;
+    color:#165DFF;
+    font-size:13px;
+}
+.footer-domains {
+    font-family: monospace;
+    font-size:12px;
+    color:#007020;
+    word-break: break-all;
+}
+.footer-note {
+    margin-top:6px;
+    font-size:11px;
+    color:#666666;
+}
 </style>
 <div class="mail-wrap">
     <!-- 顶部题号 -->
@@ -221,18 +249,37 @@
             <button class="btn-judge btn-normal" onclick="submitJudge('legit')">Legitimate</button>
         </div>
     </div>
-
-    <!-- 核心：自动引入 L1_1 / L1_2 ... 子模板 -->
+    <!-- 邮件内容 -->
     {% block mail_content %}
     {% include sub_template %}
     {% endblock %}
 
-    <!-- 置信度输入 -->
+    <!-- 置信度输入框：仅T0/T1展示，L1隐藏 -->
+    {% if template.test_difficulty != 1 %}
     <div class="conf-box">
         <label>Confidence (1-5):</label>
         <input type="number" id="conf_score" min="1" max="5" value="3" required>
     </div>
+    {% endif %}
 </div>
+
+<!-- 底部可信域名 -->
+<div class="page-footer-whitelist">
+    <span class="footer-title">📋 Trusted Domain Whitelist:&nbsp;</span>
+    <span class="footer-domains">
+        {% for item in all_config %}
+            {% if item.rule_type == "trusted_domain" %}
+                {{ item.content }}{% if not forloop.last and not loop.last %}, {% endif %}
+            {% endif %}
+        {% empty %}
+            No trusted domains configured in system.
+        {% endfor %}
+    </span>
+    <div class="footer-note">
+        Rule: Judge links only by Actual Target URL. Do not rely on real‑world web knowledge.
+    </div>
+</div>
+
 <!-- 弹窗 -->
 <div class="result-modal" id="modal">
     <div class="modal-inner">
@@ -241,6 +288,7 @@
         <button class="next-btn" onclick="goNext()">Next question</button>
     </div>
 </div>
+
 <!-- 提交表单 -->
 <form id="judge-form" action="{% url 'pretest_question' tpl_id=template.id %}" method="POST" hidden>
     {% csrf_token %}
@@ -248,20 +296,26 @@
     <input type="hidden" name="confidence" id="input-conf">
     <input type="hidden" name="email_id" value="{{ template.id }}">
 </form>
-<!-- JS逻辑 -->
+
 <script>
 const modal = document.getElementById('modal');
 const titleDom = document.getElementById('modal-title');
 const textDom = document.getElementById('modal-text');
 const form = document.getElementById('judge-form');
-const inputJudge = document.getElementById('input-judge');
 const confInput = document.getElementById('conf_score');
+const hiddenConf = document.getElementById('input-conf');
 const realLabel = "{{ template.email_label }}";
-const scamDesc = `{{ template.fraud_feature_description }}`;
+const scamDesc = `{{ template.fraud_feature_description|safe }}`;
+
 function submitJudge(userChoice){
-    let conf = confInput.value || 3;
-    document.getElementById('input-conf').value = conf;
-    inputJudge.value = userChoice;
+    // Automatically assign a value of 3 to L1 difficulty, no need to read the input box
+    {% if template.test_difficulty == 1 %}
+        let conf = 3;
+    {% else %}
+        let conf = confInput.value || 3;
+    {% endif %}
+    hiddenConf.value = conf;
+    document.getElementById('input-judge').value = userChoice;
     modal.style.display = "block";
     if(userChoice === realLabel){
         titleDom.innerText = "✅ Correct judgment";

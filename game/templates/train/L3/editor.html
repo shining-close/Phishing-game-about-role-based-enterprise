@@ -1,104 +1,371 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4">
-    <h3>Level3: Create Department Related Phishing Email</h3>
-    <p class="text-secondary">You can only create emails for your department: <strong>{{ user_dept|upper }}</strong></p>
-    <hr>
-    <form action="{% url 'submit_user_created_mail' %}" method="post">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label>Sender</label>
-            <input type="text" class="form-control" name="sender" required>
+<style>
+/* 复刻登录页圆润柔和风格，全局覆盖本页面 */
+.l3-wrap{
+    min-height: 90vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 20px;
+    background:#ffffff;
+}
+.l3-card-main{
+    width:100%;
+    max-width:980px;
+    background:#fff;
+    border-radius:22px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding:42px;
+    border:none;
+}
+.l3-card-block{
+    border-radius:16px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.05);
+    border:1px solid #f1f1f1;
+    margin-bottom:28px;
+    overflow:hidden;
+}
+.l3-card-header{
+    background:#f8f9fa;
+    padding:16px 22px;
+    font-size:18px;
+    font-weight:600;
+    border-bottom:1px solid #eee;
+}
+.l3-card-body{
+    padding:24px 22px;
+}
+.l3-form-item{
+    margin-bottom:22px;
+}
+.l3-label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:500;
+    font-size:15px;
+}
+.l3-input, .l3-select, .l3-textarea{
+    width:100%;
+    border:1px solid #dee2e6;
+    border-radius:12px;
+    padding:12px 16px;
+    font-size:15px;
+    background:#fff;
+}
+.l3-textarea{
+    min-height:110px;
+    resize:vertical;
+}
+.l3-input:focus,.l3-select:focus,.l3-textarea:focus{
+    outline:none;
+    border-color:#adb5bd;
+    box-shadow:0 0 0 3px rgba(173,181,0.15);
+}
+.l3-tip-text{
+    font-size:13px;
+    color:#6c757d;
+    margin-top:6px;
+}
+.l3-alert-tip{
+    background:#f7f8fa;
+    border-radius:12px;
+    padding:14px 18px;
+    font-size:14px;
+    color:#495057;
+    border:1px solid #e9ecef;
+    margin-bottom:20px;
+}
+.l3-btn-submit{
+    background:#97b884;
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    padding:14px 42px;
+    font-size:17px;
+    font-weight:500;
+}
+.l3-btn-cancel{
+    border-radius:12px;
+    padding:14px 42px;
+    font-size:17px;
+    border:1px solid #ced4da;
+    background:#fff;
+    color:#495057;
+    text-decoration:none;
+}
+.l3-btn-group{
+    display:flex;
+    gap:16px;
+    justify-content:center;
+    margin-top:12px;
+}
+.keyword-block{
+    background:#f0f7ff;
+    padding:12px 16px;
+    border-radius:10px;
+    margin:10px 0;
+    line-height:1.7;
+}
+.score-desc{
+    line-height:1.8;
+    font-size:14px;
+}
+</style>
+<div class="l3-wrap">
+<div class="l3-card-main">
+    <h2 style="text-align:center;margin-bottom:12px;">Level3: Create Department‑Related Phishing Email</h2>
+    <p style="text-align:center;color:#555;margin-bottom:32px;">Your department: <b>{{ user_dept|upper }}</b></p>
+    <div class="l3-alert-tip">
+        💡 Tips: Placeholders below will show role‑specific prompt according to your department.
+    </div>
+    <!-- 新增：自动评分规则&分部门关键词说明卡片 -->
+    <div class="l3-card-block">
+        <div class="l3-card-header">📊 Automatic Scoring Rules & Keyword Reference</div>
+        <div class="l3-card-body score-desc">
+            <p><strong>Total Score Composition (0–100):</strong></p>
+            <ul style="padding-left:20px;margin:8px 0 20px;">
+                <li><b>1. Dept Matching (0–30pts):</b> Contains ≥2 department official business keywords get full marks</li>
+                <li><b>2. Social Engineering Lure (0–30pts):</b> 5 lure categories (authority/urgent/loss/benefit/dept-specific), 10pts per category, max 30pts</li>
+                <li><b>3. Camouflage Technology (0–25pts):</b> Fake sender address or disguised phishing link get full marks</li>
+                <li><b>4. Flaw Concealment (0–15pts):</b> Deduction for obvious low-level phishing sentences</li>
+            </ul>
+            <p><strong>Rating Rule:</strong> ≥90 Excellent | 70~89 Good | 40~69 Normal | &lt;40 Poor<br>
+            Mails with total score ≥70 will be added to L2 training pool for all users.</p>
+            <!-- 部门正规业务词 -->
+            <div class="keyword-block">
+                <strong>{{ user_dept|upper }} Normal Business Keywords (Dept Matching Score):</strong><br>
+                {% if dept_legit_words %}
+                    {% for kw in dept_legit_words %}
+                        {{ kw }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <span style="color:#888">No official business keywords configured in backend</span>
+                {% endif %}
+            </div>
+            <!-- 部门专属钓鱼诱导词 -->
+            <div class="keyword-block">
+                <strong>{{ user_dept|upper }} Phishing Induce Keywords (Social Engineering Score):</strong><br>
+                {% if dept_phish_words %}
+                    {% for kw in dept_phish_words %}
+                        {{ kw }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <span style="color:#888">No department phishing words configured in backend</span>
+                {% endif %}
+            </div>
+            <!-- 通用社工四类 -->
+            <div class="keyword-block">
+                <strong>General Social Engineering Lure Keywords:</strong><br>
+                Authority:
+                {% if se_groups.authority %}
+                    {% for w in se_groups.authority %}{{ w }} {% endfor %}
+                {% else %}—{% endif %}<br>
+                Urgent:
+                {% if se_groups.urgent %}
+                    {% for w in se_groups.urgent %}{{ w }} {% endfor %}
+                {% else %}—{% endif %}<br>
+                Fear of loss:
+                {% if se_groups.fear_loss %}
+                    {% for w in se_groups.fear_loss %}{{ w }} {% endfor %}
+                {% else %}—{% endif %}<br>
+                Benefit:
+                {% if se_groups.benefit %}
+                    {% for w in se_groups.benefit %}{{ w }} {% endfor %}
+                {% else %}—{% endif %}
+                <div style="margin-top:8px;color:#165DFF;font-size:13px;">
+                    *Your department exclusive phishing words count as the 5th lure category
+                </div>
+            </div>
+            <!-- 【仅此处修复，其余全部保留原样】伪装提示文字：从数据库动态读取；打分逻辑仍然后端读取数据库，前端仅展示，不参与计算 -->
+            <div class="keyword-block">
+                <strong>Qualified Camouflage Content (get full 25pts):</strong><br>
+                <div>
+                    <span>Fake sender candidates:</span>
+                    {% if fake_sender_keywords %}
+                        {% for kw in fake_sender_keywords %}
+                            <code>{{ kw }}</code>{% if not forloop.last %} / {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <em>(No sender rules imported in database)</em>
+                    {% endif %}
+                </div>
+                <br>
+                <div>
+                    <span>Fake domain keywords:</span>
+                    {% if fake_domain_keywords %}
+                        {% for kw in fake_domain_keywords %}
+                            <code>{{ kw }}</code>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <em>(No domain rules imported in database)</em>
+                    {% endif %}
+                </div>
+                <br>
+                <!-- 新增实验说明文本，给受试者看，也可以截图放进论文 -->
+                <div style="margin-top:8px;font-size:0.9em;color:#444;">
+                <strong>Design note:</strong>
+                In phishing scenarios, attackers spoof sender addresses to impersonate trusted internal departments (HR / Finance / IT),
+                while using domain keywords similar to real‑enterprise systems to disguise malicious links.
+                This experimental module requires participants to construct such deceptive sender and URL to simulate real‑world social‑engineering phishing emails.
+                </div>
+            </div>
+            <!-- 低级扣分词动态渲染 -->
+            <div class="keyword-block">
+                <strong>Low-level Flaw Words (will deduct points):</strong><br>
+                {% if flaw_words %}
+                    {% for w in flaw_words %}
+                        {{ w }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <span style="color:#888">No flaw words set</span>
+                {% endif %}
+            </div>
         </div>
-        <div class="mb-3">
-            <label>Email Subject</label>
-            <input type="text" class="form-control" name="subject" required>
+    </div>
+<form action="{% url 'submit_user_created_mail' %}" method="post">
+    {% csrf_token %}
+    <!-- 基础邮件信息 -->
+    <div class="l3-card-block">
+        <div class="l3-card-header">📩 Basic Email Information</div>
+        <div class="l3-card-body">
+            <div class="l3-form-item">
+                <label class="l3-label">Sender</label>
+                <input class="l3-input" type="text" name="sender" required
+                {% if user_dept == "hr" %}placeholder="HR@fakecompany.com / Admin‑hr@fake.org"
+                {% elif user_dept == "finance" %}placeholder="Finance@corp‑fake.top / payment‑admin@fake.com"
+                {% else %}placeholder="IT‑System@fake‑org.com / tech‑support@fake.org"{% endif %}>
+                <div class="l3-tip-text">Spoof official‑looking sender to increase credibility</div>
+            </div>
+            <div class="l3-form-item">
+                <label class="l3-label">Email Subject</label>
+                <input class="l3-input" type="text" name="subject" required
+                {% if user_dept == "hr" %}placeholder="[URGENT] Salary adjustment & contract confirmation"
+                {% elif user_dept == "finance" %}placeholder="Expense reimbursement pending, account will be frozen soon"
+                {% else %}placeholder="Account security alert: your access will expire"{% endif %}>
+                <div class="l3-tip-text">Use urgent / reward / risk words to improve lure effect</div>
+            </div>
+            <div class="l3-form-item">
+                <label class="l3-label">Email Type</label>
+                <select class="l3-select" name="email_label">
+                    <option value="phish">Phishing Email</option>
+                    <option value="legit">Legitimate Email</option>
+                </select>
+            </div>
+            <div class="l3-form-item">
+                <label class="l3-label">Select Template File</label>
+                <select class="l3-select" name="template_type" required>
+                    <option value="">-- Please Choose Template --</option>
+                    <option value="L2_1">L2 Template 1</option>
+                    <option value="L2_2">L2 Template 2</option>
+                    <option value="L2_3">L2 Template 3</option>
+                </select>
+            </div>
         </div>
-        <div class="mb-3">
-            <label>Email Type</label>
-            <select class="form-select" name="email_label">
-                <option value="phish">Phishing Email</option>
-                <option value="legit">Legitimate Email</option>
-            </select>
+    </div>
+    <!-- 邮件正文段落 -->
+    <div class="l3-card-block">
+        <div class="l3-card-header">📝 Email Content Paragraphs</div>
+        <div class="l3-card-body">
+            <!-- 优化：移除硬编码部门关键词，统一引导查看上方关键词面板 -->
+            <div class="l3-alert-tip">
+                Reference the keyword table above to add official business words and phishing induce content to raise your total score.
+            </div>
+            <div class="l3-form-item">
+                <label class="l3-label">Paragraph 1</label>
+                <textarea class="l3-textarea" name="content_1"
+                {% if user_dept == "hr" %}placeholder="Dear colleague, our salary system has been updated. Please click link to verify your bank info or salary will be delayed."
+                {% elif user_dept == "finance" %}placeholder="You have one pending reimbursement record. Please confirm before end‑of‑month deadline."
+                {% else %}placeholder="Suspicious login detected. Please finish identity verification to keep your account active."{% endif %}></textarea>
+            </div>
+            <div class="l3-form-item">
+                <label class="l3-label">Paragraph 2</label>
+                <textarea class="l3-textarea" name="content_2"
+                {% if user_dept == "hr" %}placeholder="New performance bonus policy is released, click link to view detailed rules."
+                {% elif user_dept == "finance" %}placeholder="Failure to confirm will cause automatic rejection of your reimbursement application."
+                {% else %}placeholder="System security policy updated, secondary verification is mandatory for internal system access."{% endif %}></textarea>
+            </div>
+            <div class="l3-form-item">
+                <label class="l3-label">Paragraph 3</label>
+                <textarea class="l3-textarea" name="content_3" placeholder="Optional supplementary text, can leave blank"></textarea>
+            </div>
+            <div class="l3-form-item">
+                <label class="l3-label">Paragraph 4</label>
+                <textarea class="l3-textarea" name="content_4" placeholder="Closing text / deadline reminder, can leave blank"></textarea>
+            </div>
         </div>
-
-        <!-- 移除难度下拉，后端固定difficulty_level=2 -->
-
-        <div style="margin:12px 0;">
-            <label>Select Template File</label><br>
-            <select name="template_type" required>
-                <option value="">-- Please Choose Template --</option>
-                <!-- 只保留L2三个模板，删除L3选项 -->
-                <option value="L2_1">L2 Template 1</option>
-                <option value="L2_2">L2 Template 2</option>
-                <option value="L2_3">L2 Template 3</option>
-            </select>
+    </div>
+    <!-- 伪装链接配置 -->
+    <div class="l3-card-block">
+        <div class="l3-card-header">🔗 Disguised Link Settings</div>
+        <div class="l3-card-body">
+            <div class="l3-tip-text" style="margin-bottom:18px;">Tip: write friendly display text, fill fake phishing domain for hidden url</div>
+            <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+                <div>
+                    <label class="l3-label">Link Display Text 1</label>
+                    <input class="l3-input" name="link_text_1"
+                    {% if user_dept == "hr" %}placeholder="Check my salary details"
+                    {% elif user_dept == "finance" %}placeholder="Confirm my reimbursement"
+                    {% else %}placeholder="Complete account verification"{% endif %}>
+                </div>
+                <div>
+                    <label class="l3-label">Hidden Fake URL 1</label>
+                    <input class="l3-input" name="url_1" placeholder="https://hr‑verify‑fake.top">
+                </div>
+            </div>
+            <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+                <div>
+                    <label class="l3-label">Link Display Text 2</label>
+                    <input class="l3-input" name="link_text_2" placeholder="View welfare policy">
+                </div>
+                <div>
+                    <label class="l3-label">Hidden Fake URL 2</label>
+                    <input class="l3-input" name="url_2" placeholder="https://safe‑login‑fake.com">
+                </div>
+            </div>
+            <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+                <div>
+                    <label class="l3-label">Link Display Text 3</label>
+                    <input class="l3-input" name="link_text_3" placeholder="Access office portal">
+                </div>
+                <div>
+                    <label class="l3-label">Hidden Fake URL 3</label>
+                    <input class="l3-input" name="url_3" placeholder="https://pay‑check‑fake.top">
+                </div>
+            </div>
+            <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div>
+                    <label class="l3-label">Link Display Text 4</label>
+                    <input class="l3-input" name="link_text_4" placeholder="Review personal profile">
+                </div>
+                <div>
+                    <label class="l3-label">Hidden Fake URL 4</label>
+                    <input class="l3-input" name="url_4" placeholder="https://auth‑fake‑org.com">
+                </div>
+            </div>
         </div>
-
-        <h5>Email Content</h5>
-        <!-- 新增Link Text输入框 -->
-        <div class="mb-3">
-            <label>Paragraph 1</label>
-            <textarea class="form-control" rows="3" name="content_1"></textarea>
+    </div>
+    <!-- 关键词与反馈 -->
+    <div class="l3-card-block">
+        <div class="l3-card-header">📊 Keywords & Training Feedback</div>
+        <div class="l3-card-body">
+            <div class="l3-form-item">
+                <label class="l3-label">Scam Keywords (split by comma)</label>
+                <input class="l3-input" name="scam_keywords" placeholder="urgent,verify,bonus,invoice,immediately">
+                <div class="l3-tip-text">Used for automatic phishing score calculation</div>
+            </div>
+            <div class="l3-form-item">
+                <label class="l3-label">Analysis Description (Feedback text for trainee)</label>
+                <textarea class="l3-textarea" name="analysis_description" required placeholder="Explain phishing trap, recognition tips and risk consequences for trainee."></textarea>
+                <div class="l3-tip-text">This text will be shown after user finish judgement</div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label>Link Display Text 1</label>
-            <input class="form-control" placeholder="e.g. Click to verify account" name="link_text_1">
-        </div>
-        <div class="mb-3">
-            <label>Hidden Fake URL 1</label>
-            <input class="form-control" placeholder="https://fake-domain.com" name="url_1">
-        </div>
-
-        <div class="mb-3">
-            <label>Paragraph 2</label>
-            <textarea class="form-control" rows="3" name="content_2"></textarea>
-        </div>
-        <div class="mb-3">
-            <label>Link Display Text 2</label>
-            <input class="form-control" name="link_text_2">
-        </div>
-        <div class="mb-3">
-            <label>Hidden Fake URL 2</label>
-            <input class="form-control" name="url_2">
-        </div>
-
-        <div class="mb-3">
-            <label>Paragraph 3</label>
-            <textarea class="form-control" rows="3" name="content_3"></textarea>
-        </div>
-        <div class="mb-3">
-            <label>Link Display Text 3</label>
-            <input class="form-control" name="link_text_3">
-        </div>
-        <div class="mb-3">
-            <label>Hidden Fake URL 3</label>
-            <input class="form-control" name="url_3">
-        </div>
-
-        <div class="mb-3">
-            <label>Paragraph 4</label>
-            <textarea class="form-control" rows="3" name="content_4"></textarea>
-        </div>
-        <div class="mb-3">
-            <label>Link Display Text 4</label>
-            <input class="form-control" name="link_text_4">
-        </div>
-        <div class="mb-3">
-            <label>Hidden Fake URL 4</label>
-            <input class="form-control" name="url_4">
-        </div>
-
-        <div class="mb-3">
-            <label>Scam Keywords (split by comma)</label>
-            <input type="text" class="form-control" name="scam_keywords">
-        </div>
-        <div class="mb-3">
-            <label>Analysis Description (Feedback text for trainee)</label>
-            <textarea class="form-control" rows="4" name="analysis_description" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit for Admin Review</button>
-        <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
-    </form>
+    </div>
+    <div class="l3-btn-group">
+        <button class="l3-btn-submit" type="submit">Submit for Admin Review</button>
+        <a class="l3-btn-cancel" href="{% url 'home' %}">Cancel</a>
+    </div>
+</form>
+</div>
 </div>
 {% endblock %}

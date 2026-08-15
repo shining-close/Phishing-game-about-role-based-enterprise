@@ -1,19 +1,19 @@
 <div class="result-box">
-    <h2>L2训练完成报告</h2>
-    <p>本次训练总邮件：10封</p>
-    <p>正确识别钓鱼邮件：{{ session.correct_identify }} 封</p>
-    <p>误判正常邮件：{{ session.wrong_identify }} 封</p>
-    <p>综合得分：{{ session.score }} / 30</p>
+    <h2>L2 Training Completion Report</h2>
+    <p>Total emails in this training: 10</p>
+    <p>Correctly identified phishing emails: {{ session.correct_identify }}</p>
+    <p>Incorrectly flagged normal emails: {{ session.wrong_identify }}</p>
+    <p>Overall score: {{ session.score }} / 30</p>
 
     {% if session.pass_level2 %}
         <div style="color:green;font-size:18px;margin:20px 0;">
-            ✅ 达标！你正确辨别邮件数量达到7封以上，已解锁Level 3高级训练入口
+            Passed! You have correctly identified more than 7 phishing emails, and the Level 3 advanced training entry has been unlocked.
         </div>
-        <a href="{% url 'train_l3' %}">前往Level 3训练</a>
+        <a href="{% url 'train_l3' %}">Go to Level 3 Training</a>
     {% else %}
         <div style="color:red;font-size:18px;margin:20px 0;">
-            ❌ 未达标，正确辨别不足7封，无法进入Level 3，请重新完成L2训练
+            Failed, you have not correctly identified enough phishing emails, and cannot proceed to Level 3. Please retake the Level 2 training.
         </div>
-        <a href="{% url 'train_l2' %}">重新训练Level 2</a>
+        <a href="{% url 'train_l2' %}">Retake Level 2 Training</a>
     {% endif %}
 </div>

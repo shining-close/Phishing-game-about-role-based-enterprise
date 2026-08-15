@@ -1,34 +1,42 @@
 from django.contrib import admin
 from django import forms
-# 移除GameRecordModel，新增3张训练日志表
+# Import and export
+from import_export.admin import ImportExportModelAdmin
 from .models import (
     UserModel, EmailTemplateModel, Level2EmailTemplateModel,
-    AdminModel, RoleChangeApply,
-    PreTestRecord, TrainSession, UserMailAction
+    AdminModel, RoleChangeApply,ConfigRuleModel,
+    PreTestRecord, TrainSession, UserMailAction, UserConsentRecord, ExperimentSurvey
 )
+# Informed consent record: Remove the username and replace it with an anonymous ID
+@admin.register(UserConsentRecord)
+class UserConsentRecordAdmin(ImportExportModelAdmin):
+    list_display = ("id", "participant_anon_id", "consent_datetime")
+    readonly_fields = ("consent_datetime",)
+    search_fields = ["participant_anon_id"]
 
-# 用户后台展示所有积分、解锁字段
+# User management: Display anonymous participant ID
 @admin.register(UserModel)
-class UserModelAdmin(admin.ModelAdmin):
+class UserModelAdmin(ImportExportModelAdmin):
     list_display = (
-        "username", "email", "role",
+        "username", "anon_participant_id", "email", "role",
         "pre_test_score", "post_test_score",
-        "l2_total_points", "unlock_l3"
+        "l2_total_points", "unlock_l3", "has_consented"
     )
+    search_fields = ["username", "anon_participant_id"]
 
-# 预测试邮件模板（原L1）
-# 预测试邮件模板（原L1）
+# Add display, filtering and editing of test_difficulty to EmailTemplateModel
 @admin.register(EmailTemplateModel)
-class EmailTemplateAdmin(admin.ModelAdmin):
+class EmailTemplateAdmin(ImportExportModelAdmin):
     list_display = (
         "email_title",
         "department",
+        "test_difficulty",
         "template_serial",
         "email_label",
         "fake_link",
         "created_at"
     )
-    list_filter = ("department", "template_serial", "email_label")
+    list_filter = ("department", "test_difficulty", "template_serial", "email_label")
     fields = (
         "email_title",
         "email_content",
@@ -36,17 +44,42 @@ class EmailTemplateAdmin(admin.ModelAdmin):
         "template_serial",
         "email_label",
         "department",
+        "test_difficulty",
         "risk_keywords",
         "fraud_feature_description"
     )
     search_fields = ("email_title",)
 
-# L2/L3共用训练邮件模板（删除强制difficulty=2限制，后台可自由选2/3）
+# ========== Revised L2/L3 Email Template Management (with user‑submitted review function) ==========
 @admin.register(Level2EmailTemplateModel)
-class Level2EmailTemplateAdmin(admin.ModelAdmin):
-    list_display = ["subject", "department", "difficulty_level", "template_type", "email_label"]
-    list_filter = ["department", "difficulty_level", "email_label"]
-    search_fields = ["subject", "sender", "department"]
+class Level2EmailTemplateAdmin(ImportExportModelAdmin):
+    # List display: New source, enabled or not
+    list_display = [
+        "subject",
+        "department",
+        "difficulty_level",
+        "source",
+        "is_available",
+        "template_type",
+        "email_label"
+    ]
+    # Side filtering: You can separately filter user submissions/pending review
+    list_filter = ["source", "is_available", "department", "difficulty_level", "email_label"]
+    # Expand the search scope and support keyword‑based and text‑analysis‑based retrieval
+    search_fields = ["subject", "sender", "department", "scam_keywords", "analysis_description"]
+
+    # Batch review operation
+    actions = ["batch_approve_user_submit", "batch_reject_user_submit"]
+
+    # Batch approve: Set as available, enter the training pool
+    def batch_approve_user_submit(self, request, queryset):
+        queryset.update(is_available=True)
+    batch_approve_user_submit.short_description = "Approved, enable this email (join the training pool)"
+
+    # Batch reject: Keep unavailable, do not participate in training
+    def batch_reject_user_submit(self, request, queryset):
+        queryset.update(is_available=False)
+    batch_reject_user_submit.short_description = "Rejected, disable this email (do not join the training pool)"
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == "department":
@@ -70,38 +103,44 @@ class Level2EmailTemplateAdmin(admin.ModelAdmin):
             ])
         return super().formfield_for_dbfield(db_field, request,** kwargs)
 
-# ========== 新增：预测试答题记录后台 ==========
+# Add "test" to the PreTestRecord_To list and filter, distinguish L1/T0/T1
 @admin.register(PreTestRecord)
-class PreTestRecordAdmin(admin.ModelAdmin):
-    list_display = ("user", "target_email", "judge_result", "confidence_score", "operation_timestamp")
-    list_filter = ("judge_result",)
-    search_fields = ("user__username", "target_email__email_title")
+class PreTestRecordAdmin(ImportExportModelAdmin):
+    list_display = ("user", "test_difficulty", "target_email", "judge_result", "confidence_score", "operation_timestamp")
+    list_filter = ("test_difficulty", "judge_result")
+    search_fields = ("user__username", "user__anon_participant_id", "target_email__email_title")
 
-# ========== 新增：仿真训练会话后台 ==========
 @admin.register(TrainSession)
-class TrainSessionAdmin(admin.ModelAdmin):
+class TrainSessionAdmin(ImportExportModelAdmin):
     list_display = ("user", "difficulty", "start_time", "end_time", "total_score")
     list_filter = ("difficulty",)
-    search_fields = ("user__username",)
-
-# ========== 新增：用户邮件行为日志后台 ==========
+    search_fields = ("user__username", "user__anon_participant_id")
+    actions = ["delete_selected"]
+    
 @admin.register(UserMailAction)
-class UserMailActionAdmin(admin.ModelAdmin):
+class UserMailActionAdmin(ImportExportModelAdmin):
     list_display = ("session", "mail", "action_type", "action_time")
     list_filter = ("action_type", "session__difficulty")
-    search_fields = ("session__user__username", "mail__subject")
+    search_fields = ("session__user__username", "session__user__anon_participant_id", "mail__subject")
 
-# 管理员账号
 @admin.register(AdminModel)
-class AdminModelAdmin(admin.ModelAdmin):
+class AdminModelAdmin(ImportExportModelAdmin):
     list_display = ("admin_user", "admin_access_key")
 
-# 角色变更申请
 @admin.register(RoleChangeApply)
-class RoleApplyAdmin(admin.ModelAdmin):
+class RoleChangeApplyAdmin(ImportExportModelAdmin):
     list_display = ("user", "target_role", "status", "apply_time", "audit_admin", "admin_remark")
+    search_fields = ("user__username", "user__anon_participant_id")
 
-# ========== 废弃GameRecordModel 注释掉注册代码 ==========
-# @admin.register(GameRecordModel)
-# class GameRecordAdmin(admin.ModelAdmin):
-#     list_display = ("user", "target_email", "judge_result", "confidence_score", "operation_timestamp")
+@admin.register(ExperimentSurvey)
+class ExperimentSurveyAdmin(ImportExportModelAdmin):
+    list_display = ("user", "q6_most_help_level", "q13_prefer_train_mode", "q19_willing_reuse", "submit_time")
+    list_filter = ("q6_most_help_level", "q13_prefer_train_mode", "q19_willing_reuse")
+    search_fields = ("user__username", "user__anon_participant_id", "q8_level_advantage_text", "q18_rule_adjust_suggest")
+    actions = ["delete_selected"]
+
+@admin.register(ConfigRuleModel)
+class ConfigRuleAdmin(ImportExportModelAdmin):
+    list_display = ["rule_type", "content", "desc"]
+    list_filter = ["rule_type"]
+    search_fields = ["content", "desc"]

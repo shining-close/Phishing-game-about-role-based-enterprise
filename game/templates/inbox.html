@@ -1,12 +1,5 @@
 {% extends "base.html" %}
-{% block title %}
-{% if diff == 2 %}
-Level 2 Intermediate Training | Outlook Mail Simulator
-{% else %}
-Level 3 Advanced Training | Anti-Phishing Confrontation Simulation
-{% endif %}
-{% endblock %}
-{# 隐藏base里的全局导航栏，DOM保留不破坏布局 #}
+{% block title %}Level 2 Intermediate Mail Simulation | Outlook Mail Simulator{% endblock %}
 {% block top_nav %}
 <div style="display: none;"></div>
 {% endblock %}
@@ -20,27 +13,27 @@ Level 3 Advanced Training | Anti-Phishing Confrontation Simulation
     border-radius:6px;
     overflow:hidden;
     display:grid;
-    grid-template-columns:190px 340px 1fr;
+    grid-template-columns:180px 340px 1fr;
     height:720px;
 }
-/* 左侧文件夹栏 */
-.sidebar-folder{
+.sidebar{
     background:#f5f7fa;
     border-right:1px solid #ddd;
     padding:16px 8px;
 }
 .folder-item{
-    padding:9px 12px;
+    padding:10px 12px;
     border-radius:5px;
     cursor:pointer;
     margin-bottom:4px;
+    font-size:14px;
 }
 .folder-item.active{
     background:#d0e1ff;
     color:#165DFF;
     font-weight:bold;
 }
-/* 中间邮件列表 */
+/* Intermediate mailing list */
 .mail-list-panel{
     border-right:1px solid #ddd;
     overflow-y:auto;
@@ -54,7 +47,7 @@ Level 3 Advanced Training | Anti-Phishing Confrontation Simulation
 .mail-item.selected{background:#e8f0ff;}
 .mail-title{font-weight:500;font-size:16px;margin-bottom:4px;}
 .mail-sender{font-size:13px;color:#666;}
-/* 右侧预览面板 */
+/* Right-side preview panel */
 .preview-panel{
     padding:20px;
     overflow-y:auto;
@@ -89,50 +82,55 @@ Level 3 Advanced Training | Anti-Phishing Confrontation Simulation
     border-color:#dd4444;
     color:#dd4444;
 }
-/* 训练页面内部标题栏 */
+/* Intermediate mailing list */
 .top-nav-bar{
     max-width:1400px;
     margin:0 auto 12px;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    gap:16px;
 }
-.btn-create{
-    padding:8px 16px;
-    background:#28a745;
-    color:white;
-    border:none;
+/* Footer whitelist style */
+.page-footer-whitelist {
+    max-width: 1400px;
+    margin: 12px auto 0;
+    padding:12px 16px;
+    background:#f7f9fc;
+    border:1px solid #dde1e7;
     border-radius:6px;
-    cursor:pointer;
+}
+.footer-title {
+    font-weight:bold;
+    color:#165DFF;
+    font-size:13px;
+}
+.footer-domains {
+    font-family: monospace;
+    font-size:12px;
+    color:#007020;
+    word-break: break-all;
+}
+.footer-note {
+    margin-top:6px;
+    font-size:11px;
+    color:#666666;
 }
 </style>
 <div class="top-nav-bar">
-    <h2>
-        {% if diff == 2 %}
-        Level 2 Intermediate Mail Simulation
-        {% else %}
-        Level 3 Advanced Confrontation Mail Simulation
-        {% endif %}
-    </h2>
-    <div style="display:flex; gap:12px; align-items:center;">
-        {% if diff == 3 %}
-        <a href="{% url 'level3_editor' %}">
-            <button class="btn-create">Create Department Phishing Email(L3)</button>
-        </a>
-        {% endif %}
+    <h2>Level 2 Intermediate Mail Simulation</h2>
+    <div>
         <button onclick="finishSession()" style="padding:8px 16px;background:#008844;color:white;border:none;border-radius:6px;">End Training & Generate Report</button>
     </div>
 </div>
 <div class="wrapper">
-    <!-- 1.左侧文件夹导航 -->
-    <div class="sidebar-folder">
+    <!--Left folder navigation -->
+    <div class="sidebar">
         <div class="folder-item active" data-folder="inbox">📥 Inbox</div>
         <div class="folder-item" data-folder="suspicious">⚠️ Suspicious Mails</div>
         <div class="folder-item" data-folder="processed">✅ Processed</div>
         <div class="folder-item" data-folder="deleted">🗑️ Deleted Items</div>
     </div>
-    <!-- 2.中间邮件列表 -->
+    <!--Intermediate mailing list -->
     <div class="mail-list-panel" id="mailList">
         {% for mail in mail_list %}
         <div class="mail-item" data-mail-id="{{ mail.id }}">
@@ -143,9 +141,25 @@ Level 3 Advanced Training | Anti-Phishing Confrontation Simulation
         <div style="padding:20px;color:#777;">No mails available for your department.</div>
         {% endfor %}
     </div>
-    <!-- 3.右侧邮件预览容器 -->
+    <!--Right-side preview panel -->
     <div class="preview-panel" id="previewArea">
         <div class="empty-tip">Select an email from list to preview</div>
+    </div>
+</div>
+<!-- Page bottom footer: Filter trusted domains from unified configuration table -->
+<div class="page-footer-whitelist">
+    <span class="footer-title">📋 Trusted Domain Whitelist:&nbsp;</span>
+    <span class="footer-domains">
+        {% for item in all_config %}
+            {% if item.rule_type == "trusted_domain" %}
+                {{ item.content }}{% if not forloop.last and not loop.last %}, {% endif %}
+            {% endif %}
+        {% empty %}
+            No trusted domains configured in system.
+        {% endfor %}
+    </span>
+    <div class="footer-note">
+        Rule: Judge links only by Actual Target URL. Do not rely on real‑world web knowledge.
     </div>
 </div>
 <form id="endSessionForm" action="{% url 'finish_train_session' %}" method="POST" hidden>
@@ -163,15 +177,42 @@ const actionFolderMap = {
     "report_phish": "processed",
     "mark_legit": "processed"
 };
-// 防重复提交链接标记
 let clickingLink = false;
+// Record behavior entry
+function recordAction(mailId, actType) {
+    if (actType === "click_link") {
+        recordLinkClick(mailId, actType);
+    } else {
+        runRecord(mailId, actType);
+    }
+}
+// Record link click behavior
+function recordLinkClick(mailId, actionType) {
+    if (!mailId || clickingLink) return;
+    clickingLink = true;
+    $.post("{% url 'mail_action_save' %}", {
+        csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+        session_id: "{{ session.id }}",
+        mail_id: mailId,
+        action: actionType
+    })
+    .done(()=>{
+        console.log("link click saved");
+    })
+    .fail(xhr=>{
+        console.error("link click failed", xhr.responseText);
+    })
+    .always(()=>{
+        clickingLink = false;
+    });
+}
 $(function(){
-    // 初始化所有邮件归属收件箱
+    //Initialize the status of the email folder
     $(".mail-item").each(function(){
         const mid = $(this).data("mail-id");
         mailFolderMap[mid] = "inbox";
     })
-    // 左侧文件夹切换
+    //Switch folders
     $(".folder-item").click(function(){
         currentFolder = $(this).data("folder");
         $(".folder-item").removeClass("active");
@@ -179,45 +220,29 @@ $(function(){
         filterMailByFolder();
         $("#previewArea").html(`<div class="empty-tip">Select an email from list to preview</div>`);
     })
-    // 中间邮件点击加载详情
+    
     $(document).on("click", ".mail-item", function(){
         const mailId = $(this).data("mail-id");
         currentMailId = mailId;
         $(".mail-item").removeClass("selected");
         $(this).addClass("selected");
-        const tpl = "{% url 'l2_mail_detail' mail_id=9999 %}";
-        const url = tpl.replace("9999", mailId);
-        $.get(url, function(html){
+        const baseUrl = "{% url 'l2_mail_detail' mail_id=9999 %}";
+        let realUrl = baseUrl.replace("9999", mailId);
+        realUrl += `?session_id={{ session.id }}`;
+        $.get(realUrl, function(html){
             $("#previewArea").html(html);
+        }).fail(function(xhr){
+            $("#previewArea").html("<div class='empty-tip'>Failed to load email content</div>");
         });
     })
-    // 右侧操作按钮事件委托
+    //Operation button event delegation
     $(document).on("click", "#previewArea .action-btn", function(){
         const mailId = $(this).data("mid");
         const actType = $(this).data("act");
         runRecord(mailId, actType);
     })
-    // 【邮件内链接点击 记录click_link，禁止跳转、防重复点击】
-    $("#previewArea").on("click", ".mail-body a", function(e){
-        e.preventDefault();
-        const mailId = currentMailId;
-        if (!mailId || clickingLink) return;
-        clickingLink = true;
-        $.post("{% url 'mail_action_save' %}", {
-            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-            session_id: "{{ session.id }}",
-            mail_id: mailId,
-            action: "click_link"
-        }).done(function(){
-            console.log("Link click behavior saved");
-        }).fail(function(err){
-            console.error("Failed to save link click", err);
-        }).always(()=>{
-            clickingLink = false;
-        });
-    });
 })
-// 过滤邮件显示
+//Filter the display of the mailing list
 function filterMailByFolder(){
     $(".mail-item").each(function(){
         const mid = $(this).data("mail-id");
@@ -228,7 +253,7 @@ function filterMailByFolder(){
         }
     })
 }
-// 封装提交操作（页面按钮：标记/删除/举报）
+//End the training
 function runRecord(mailId, actionType){
     $.post("{% url 'mail_action_save' %}", {
         csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
@@ -242,10 +267,10 @@ function runRecord(mailId, actionType){
         $("#previewArea").html(`<div class="empty-tip">Select an email from list to preview</div>`);
     })
     .fail(xhr=>{
-        console.error("操作失败", xhr.responseText);
+        console.error("action failed", xhr.responseText);
     })
 }
-// 结束训练弹窗
+//End the training
 function finishSession(){
     const tip = "Once ended, you cannot continue operating emails. Confirm to submit all operation records and generate evaluation report?";
     if(!confirm(tip)) return;

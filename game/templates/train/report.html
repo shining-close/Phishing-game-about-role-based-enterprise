@@ -23,12 +23,12 @@
 
 {% if session.pass_level2 %}
 <div class="pass">
-    ✅ Pass! Your final score reaches 30. Level 3 training is unlocked.
-    <br><a href="{% url 'train_l3' %}">Go to Level 3 Training</a>
+    Pass! Your final score reaches 30. Level 3 training is unlocked.
+    <br><a href="{% url 'level3_editor' %}">Go to Level 3 Training</a>
 </div>
 {% else %}
 <div class="fail">
-    ❌ Not passed. Your final score needs to reach 30 to unlock Level 3.
+    Not passed. Your final score needs to reach 30 to unlock Level 3.
     <br><a href="{% url 'train_l2' %}">Restart Level 2 Training</a>
 </div>
 {% endif %}

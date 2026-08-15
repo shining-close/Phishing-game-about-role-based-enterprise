@@ -55,7 +55,7 @@ class LoginForm(AuthenticationForm):
         widget=forms.PasswordInput(attrs={"placeholder": "Enter your password"})
     )
 
-# 新增：修改密码表单
+# New: Password‑modification form
 class ChangePasswordForm(forms.Form):
     old_password = forms.CharField(
         label="Original Password",
@@ -84,7 +84,7 @@ class ChangePasswordForm(forms.Form):
             self.add_error("confirm_password", "Two new passwords do not match")
         return cleaned
 
-# 新增：身份切换申请表单
+# New Addition: Identity Switch Application Form
 class RoleApplyForm(forms.ModelForm):
     class Meta:
         model = RoleChangeApply
@@ -95,7 +95,7 @@ class RoleApplyForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         current_user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
-        # 过滤掉用户当前角色，不能申请相同身份
+        # Filter out the user's current role; the same identity cannot be applied for.
         if current_user:
             self.fields["target_role"].choices = [
                 (val, name) for val, name in UserModel.ROLE_CHOICES

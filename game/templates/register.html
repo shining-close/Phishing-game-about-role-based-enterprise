@@ -8,7 +8,7 @@
     margin-top:70px;
 }
 .register-card{
-    width:540px;
+    width:620px;
     background:#ffffff;
     border-radius:14px;
     box-shadow: 0 2px 16px rgba(0,0,0,0.08);
@@ -40,7 +40,6 @@
 .form-item input::placeholder{
     color:#b0b4bc;
 }
-/* 目标绿色按钮 */
 .btn-submit{
     width:100%;
     padding:16px;
@@ -65,11 +64,41 @@
     font-size:16px;
     margin-top:6px;
 }
+.role-desc-block{
+    background:#f7f9fc;
+    padding:18px 22px;
+    border-radius:10px;
+    margin-bottom:28px;
+    border-left:5px solid #7898c8;
+}
+.role-desc-block h4{
+    font-size:20px;
+    margin:0 0 10px 0;
+    color:#2c4260;
+}
+.role-desc-block p{
+    font-size:16px;
+    line-height:1.6;
+    color:#444;
+    margin:0;
+}
 </style>
-
 <div class="wrap">
     <div class="register-card">
         <h2 class="register-title">Employee Registration - Select Your Job Role</h2>
+
+        <div class="role-desc-block">
+            <h4>1. Human Resources (HR)</h4>
+            <p>HR staff frequently communicate with applicants, employees and external benefit vendors via emails. Daily work includes payroll adjustment requests, recruitment documents, employee medical leave and personal data updates. Attackers often send fake benefit notices, fake salary modification links and spoof employee identity emails to steal confidential personal data, so HR faces high phishing risks involving identity and payroll fraud.</p>
+        </div>
+        <div class="role-desc-block">
+            <h4>2. Finance Department</h4>
+            <p>Finance teams handle invoices, supplier payment requests, reimbursement forms and corporate fund transfers every day. Cybercriminals target finance staff with forged supplier invoices, fake CEO urgent transfer orders and fake bank verification links. Fraudulent emails pressure accountants to complete fund transfers quickly, which may cause direct financial loss to the company.</p>
+        </div>
+        <div class="role-desc-block">
+            <h4>3. IT Department</h4>
+            <p>IT administrators manage internal system accounts, server maintenance and employee password resets. Phishing attackers impersonate official security vendors or internal management to send fake system upgrade links, fake login portals and urgent vulnerability repair notifications, aiming to steal admin accounts and gain full access to corporate internal systems.</p>
+        </div>
 
         {% if form.errors %}
         <div class="error-tip">
@@ -79,7 +108,6 @@
 
         <form method="post">
             {% csrf_token %}
-
             <div class="form-item">
                 <label>Username</label>
                 {{ form.username }}
@@ -87,7 +115,6 @@
                 <div class="field-error">{{ form.username.errors }}</div>
                 {% endif %}
             </div>
-
             <div class="form-item">
                 <label>Email</label>
                 {{ form.email }}
@@ -95,7 +122,6 @@
                 <div class="field-error">{{ form.email.errors }}</div>
                 {% endif %}
             </div>
-
             <div class="form-item">
                 <label>Password</label>
                 {{ form.password }}
@@ -103,7 +129,6 @@
                 <div class="field-error">{{ form.password.errors }}</div>
                 {% endif %}
             </div>
-
             <div class="form-item">
                 <label>Confirm Password</label>
                 {{ form.password_confirm }}
@@ -111,7 +136,6 @@
                 <div class="field-error">{{ form.password_confirm.errors }}</div>
                 {% endif %}
             </div>
-
             <div class="form-item">
                 <label>Department / Role</label>
                 {{ form.role }}
@@ -119,7 +143,6 @@
                 <div class="field-error">{{ form.role.errors }}</div>
                 {% endif %}
             </div>
-
             <div class="form-item">
                 <button class="btn-submit" type="submit">Complete Registration</button>
             </div>

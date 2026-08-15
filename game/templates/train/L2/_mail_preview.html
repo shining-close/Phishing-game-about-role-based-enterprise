@@ -7,7 +7,7 @@
     {% if template.template_type %}
         {% include sub_template %}
     {% else %}
-        <!-- 用户自定义邮件，直接渲染字段，不再引入外部html片段 -->
+        <!-- User-defined emails directly render fields without introducing external html fragments -->
         {{ template.content_1|safe }}
         {% if template.url_1 %}<a href="javascript:void(0)" class="mail-link">{{ template.url_1 }}</a>{% endif %}
 
@@ -22,8 +22,19 @@
     {% endif %}
 </div>
 <div class="operate-bar">
-    <button class="action-btn" data-mid="{{ template.id }}" data-act="mark_suspicious">Mark Suspicious</button>
-    <button class="action-btn" data-mid="{{ template.id }}" data-act="mark_legit">Mark Legitimate</button>
+    <button class="action-btn" data-mid="{{ template.id }}" data-act="report_phish">Report as Phishing</button>
+    <button class="action-btn" data-mid="{{ template.id }}" data-act="mark_legit">Mark as Legitimate</button>
     <button class="action-btn danger" data-mid="{{ template.id }}" data-act="delete_mail">Delete Mail</button>
-    <button class="action-btn" data-mid="{{ template.id }}" data-act="report_phish">Report Phishing</button>
+    <button class="action-btn" data-mid="{{ template.id }}" data-act="mark_suspicious">Mark Suspicious</button>
 </div>
+
+{% if diff == 4 or diff == 5 %}
+<div class="conf-wrap">
+    <span>Judgment Confidence (1=Uncertain ~ 5=Very Certain): </span>
+    <label class="conf-item"><input type="radio" name="confidence" value="1">1</label>
+    <label class="conf-item"><input type="radio" name="confidence" value="2">2</label>
+    <label class="conf-item"><input type="radio" name="confidence" value="3">3</label>
+    <label class="conf-item"><input type="radio" name="confidence" value="4">4</label>
+    <label class="conf-item"><input type="radio" name="confidence" value="5">5</label>
+</div>
+{% endif %}

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # New apps
     'game',
     'crispy_forms',
+    "import_export",
 ]
 
 # Form script library for Django
@@ -83,7 +84,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'phish_db',
-        'USER': 'root',        # 你的MySQL账号
+        'USER': 'root',        # MySQL account
         'PASSWORD': 'AEAEAEEOO',
         'HOST': '127.0.0.1',
         'PORT': '3306',

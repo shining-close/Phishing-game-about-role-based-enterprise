@@ -1,13 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Personal Center{% endblock %}
-
 {% block content %}
 <style>
 .card{border:1px solid #ccc;border-radius:8px;padding:24px;margin-bottom:20px;max-width:750px;}
 .btn{display:inline-block;padding:9px 18px;background:#165DFF;color:#fff;text-decoration:none;border-radius:6px;margin:8px 4px;}
 </style>
 <h1>Personal Center</h1>
-
 <div class="card">
     <h3>Account Information</h3>
     <p>Username：{{ user.username }}</p>
@@ -18,7 +16,6 @@
         <p style="color:#ff7800;">⚠ You have a pending role change application waiting for admin review</p>
     {% endif %}
 </div>
-
 <div class="card">
     <h3>Function Menu</h3>
     <a href="{% url 'change_password' %}" class="btn">Change Password</a>
@@ -26,5 +23,30 @@
     <a href="{% url 'apply_role_change' %}" class="btn">Apply to Switch Role</a>
     <a href="{% url 'my_submit_mail_list' %}" class="btn btn-outline-primary mb-2">My Created Emails</a>
 </div>
-
+<div class="mt-4">
+    <h4>Experiment Tests</h4>
+    <div>
+        {% if has_finish_t0 %}
+            <button class="btn btn-success" disabled>✅ T0 Baseline Test (Completed)</button>
+        {% else %}
+            <a href="{% url 't0_baseline' %}" class="btn btn-success">Start T0 Baseline Test</a>
+        {% endif %}
+        {% if has_finish_t1 %}
+            <button class="btn btn-success" disabled>✅ T1 Post‑Training Test (Completed)</button>
+        {% else %}
+            <a href="{% url 't1_posttrain' %}" class="btn btn-success">Start T1 Result Test</a>
+        {% endif %}
+    </div>
+    <p class="text-secondary small mt-2">Each test can only be taken once.</p>
+</div>
+<div class="card mt-4">
+    <h4>Post‑Experiment Questionnaire</h4>
+    {% if user.survey_records.all %}
+        <button class="btn" disabled>✅ Questionnaire Completed</button>
+        <p class="text-secondary small mt-2">You have finished the feedback survey.</p>
+    {% else %}
+        <a href="{% url 'experiment_survey' %}" class="btn">Fill Experience Questionnaire</a>
+        <p class="text-secondary small mt-2">Suggest to fill after finishing T0, L2 training and T1 post‑test.</p>
+    {% endif %}
+</div>
 {% endblock %}

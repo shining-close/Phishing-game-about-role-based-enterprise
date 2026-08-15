@@ -1,0 +1,210 @@
+id,rule_type,content,desc
+,dept_hr_legit,Onboarding processing,HR legit
+,dept_hr_legit,fresh graduate campus recruitment,HR legit
+,dept_hr_legit,recruitment resume,HR legit
+,dept_hr_legit,background check,HR legit
+,dept_hr_legit,labor contract,HR legit
+,dept_hr_legit,social security and housing fund,HR legit
+,dept_hr_legit,individual income tax declaration,HR legit
+,dept_hr_legit,employee roster,HR legit
+,dept_hr_legit,salary slip,HR legit
+,dept_hr_legit,performance evaluation,HR legit
+,dept_hr_legit,internal competition,HR legit
+,dept_hr_legit,position adjustment,HR legit
+,dept_hr_legit,resignation procedures,HR legit
+,dept_hr_legit,attendance record,HR legit
+,dept_hr_legit,employee file,HR legit
+,dept_hr_legit,physical examination notice,HR legit
+,dept_hr_legit,headhunting cooperation,HR legit
+,dept_hr_legit,probation approval,HR legit
+,dept_hr_legit,department establishment,HR legit
+,dept_hr_legit,training registration,HR legit
+,dept_hr_legit,onboarding materials,HR legit
+,dept_hr_legit,labor relationship,HR legit
+,dept_hr_legit,personnel filing,HR legit
+,dept_hr_legit,social security base,HR legit
+,dept_hr_legit,annual leave application,HR legit
+,dept_hr_phish,Urgent submission,HR phish
+,dept_hr_phish,24-hour deadline,HR phish
+,dept_hr_phish,overdue freeze,HR phish
+,dept_hr_phish,CEO retrieval of all employee files,HR phish
+,dept_hr_phish,salary update link,HR phish
+,dept_hr_phish,ID upload,HR phish
+,dept_hr_phish,bank account reporting,HR phish
+,dept_hr_phish,social security account lockout,HR phish
+,dept_hr_phish,individual income tax refund,HR phish
+,dept_hr_phish,high-paying internal referral,HR phish
+,dept_hr_phish,resume supplementation,HR phish
+,dept_hr_phish,privacy verification,HR phish
+,dept_hr_phish,salary flow upload,HR phish
+,dept_hr_phish,personnel audit,HR phish
+,dept_hr_phish,employee information export,HR phish
+,dept_hr_phish,external background check platform,HR phish
+,dept_hr_phish,onboarding subsidy application,HR phish
+,dept_hr_phish,social security supplementary payment fines,HR phish
+,dept_hr_phish,time-limited file submission,HR phish
+,dept_hr_phish,third-party information system,HR phish
+,dept_finance_legit,Monthly reconciliation,Finance legit
+,dept_finance_legit,VAT invoice,Finance legit
+,dept_finance_legit,corporate account,Finance legit
+,dept_finance_legit,supplier settlement,Finance legit
+,dept_finance_legit,travel expense reimbursement,Finance legit
+,dept_finance_legit,quarterly tax filing,Finance legit
+,dept_finance_legit,input tax deduction,Finance legit
+,dept_finance_legit,bank receipt,Finance legit
+,dept_finance_legit,corporate transfer,Finance legit
+,dept_finance_legit,expense write-off,Finance legit
+,dept_finance_legit,financial statement,Finance legit
+,dept_finance_legit,budget approval,Finance legit
+,dept_finance_legit,tax clearance certificate,Finance legit
+,dept_finance_legit,online banking,Finance legit
+,dept_finance_legit,accounts payable,Finance legit
+,dept_finance_legit,tax hall,Finance legit
+,dept_finance_legit,invoice red cancellation,Finance legit
+,dept_finance_legit,cost accounting,Finance legit
+,dept_finance_legit,reimbursement process,Finance legit
+,dept_finance_legit,monthly audit,Finance legit
+,dept_finance_phish,Urgent corporate remittance,Finance phish
+,dept_finance_phish,deadline for the day,Finance phish
+,dept_finance_phish,tax overdue fine,Finance phish
+,dept_finance_phish,tax refund application,Finance phish
+,dept_finance_phish,false invoice attachment,Finance phish
+,dept_finance_phish,CEO temporary payment,Finance phish
+,dept_finance_phish,frozen corporate account,Finance phish
+,dept_finance_phish,late payment penalty,Finance phish
+,dept_finance_phish,scanning payment,Finance phish
+,dept_finance_phish,financial system update,Finance phish
+,dept_finance_phish,bank account corporate verification,Finance phish
+,dept_finance_phish,tax refund link,Finance phish
+,dept_finance_phish,supplier collection,Finance phish
+,dept_finance_phish,audit attachment,Finance phish
+,dept_finance_phish,unreported penalty,Finance phish
+,dept_finance_phish,time-limited fund transfer,Finance phish
+,dept_finance_phish,private transfer channel,Finance phish
+,dept_finance_phish,false tax clearance document,Finance phish
+,dept_it_legit,Server inspection,IT legit
+,dept_it_legit,VPN login,IT legit
+,dept_it_legit,cloud server,IT legit
+,dept_it_legit,database operation,IT legit
+,dept_it_legit,security patch,IT legit
+,dept_it_legit,vulnerability scanning,IT legit
+,dept_it_legit,background access,IT legit
+,dept_it_legit,firewall,IT legit
+,dept_it_legit,operation ticket,IT legit
+,dept_it_legit,system upgrade,IT legit
+,dept_it_legit,bandwidth expansion,IT legit
+,dept_it_legit,cloud resource renewal,IT legit
+,dept_it_legit,account permission,IT legit
+,dept_it_legit,log audit,IT legit
+,dept_it_legit,software update,IT legit
+,dept_it_legit,internal network control,IT legit
+,dept_it_legit,data backup,IT legit
+,dept_it_legit,IT asset inventory,IT legit
+,dept_it_phish,High-risk vulnerabilities urgently fixed,IT phish
+,dept_it_phish,system paralysis within 2 hours,IT phish
+,dept_it_phish,remote access to database,IT phish
+,dept_it_phish,expired VPN account,IT phish
+,dept_it_phish,application for administrator privileges,IT phish
+,dept_it_phish,suspension of cloud account due to overdue bill,IT phish
+,dept_it_phish,malicious backdoor tools,IT phish
+,dept_it_phish,patch installation package,IT phish
+,dept_it_phish,server intrusion warning,IT phish
+,dept_it_phish,external links for background login,IT phish
+,dept_it_phish,temporary granting of executive authority,IT phish
+,dept_it_phish,urgent verification of data leakage,IT phish
+,dept_it_phish,vulnerability package from third-party security vendors,IT phish
+,se_authority,CEO notice,SE authority
+,se_authority,general manager instruction,SE authority
+,se_authority,headquarters audit,SE authority
+,se_authority,tax bureau,SE authority
+,se_authority,official human resources department,SE authority
+,se_authority,group risk control,SE authority
+,se_authority,CTO operation instruction,SE authority
+,se_urgent,Time-limited,SE urgent
+,se_urgent,24 hours,SE urgent
+,se_urgent,deadline for today,SE urgent
+,se_urgent,immediate handling,SE urgent
+,se_urgent,overdue freeze,SE urgent
+,se_fear,accountability,SE fear
+,se_fear,heavy fines,SE fear
+,se_fear,system paralysis,SE fear
+,se_fear,account lockout,SE fear
+,se_fear,audit inspection,SE fear
+,se_benefit,Subsidy,SE benefit
+,se_benefit,tax refund,SE benefit
+,se_benefit,high salary,SE benefit
+,se_benefit,free upgrade,SE benefit
+,se_benefit,welfare application,SE benefit
+,se_benefit,cash return,SE benefit
+,se_benefit,special subsidy,SE benefit
+,regex_sender,hr-official,Fake sender
+,regex_sender,staff-info,Fake sender
+,regex_sender,social-tax,Fake sender
+,regex_sender,recruit-audit,Fake sender
+,regex_sender,employee-file,Fake sender
+,regex_sender,payroll-notice,Fake sender
+,regex_sender,socialsecurity-fake,Fake sender
+,regex_sender,career-rebate,Fake sender
+,regex_sender,hr-backend,Fake sender
+,regex_sender,tax-notice,Fake sender
+,regex_sender,invoice-fake,Fake sender
+,regex_sender,finance-transfer,Fake sender
+,regex_sender,vat-rebate,Fake sender
+,regex_sender,bank-corp,Fake sender
+,regex_sender,tax-gov-fake,Fake sender
+,regex_sender,supplier-bill,Fake sender
+,regex_sender,audit-system,Fake sender
+,regex_sender,vpn-login-fake,Fake sender
+,regex_sender,cloud-alert,Fake sender
+,regex_sender,server-patch,Fake sender
+,regex_sender,db-admin,Fake sender
+,regex_sender,security-scan,Fake sender
+,regex_sender,it-backend,Fake sender
+,regex_sender,cloud-bill,Fake sender
+,regex_domain,hr-official,Fake domain
+,regex_domain,staff-info,Fake domain
+,regex_domain,social-tax,Fake domain
+,regex_domain,recruit-audit,Fake domain
+,regex_domain,employee-file,Fake domain
+,regex_domain,payroll-notice,Fake domain
+,regex_domain,socialsecurity-fake,Fake domain
+,regex_domain,career-rebate,Fake domain
+,regex_domain,hr-backend,Fake domain
+,regex_domain,tax-notice,Fake domain
+,regex_domain,invoice-fake,Fake domain
+,regex_domain,finance-transfer,Fake domain
+,regex_domain,vat-rebate,Fake domain
+,regex_domain,bank-corp,Fake domain
+,regex_domain,tax-gov-fake,Fake domain
+,regex_domain,supplier-bill,Fake domain
+,regex_domain,audit-system,Fake domain
+,regex_domain,vpn-login-fake,Fake domain
+,regex_domain,cloud-alert,Fake domain
+,regex_domain,server-patch,Fake domain
+,regex_domain,db-admin,Fake domain
+,regex_domain,security-scan,Fake domain
+,regex_domain,it-backend,Fake domain
+,regex_domain,cloud-bill,Fake domain
+,flaw_word,dear user,Flaw word
+,flaw_word,click this link,Flaw word
+,flaw_word,log in now,Flaw word
+,flaw_word,verify your account immediately,Flaw word
+,flaw_word,your account will be deleted,Flaw word
+,flaw_word,you have won,Flaw word
+,flaw_word,limited time offer,Flaw word
+,forbid_word,violence,Forbidden
+,forbid_word,gambling,Forbidden
+,forbid_word,porn,Forbidden
+,forbid_word,hack,Forbidden
+,forbid_word,drug,Forbidden
+,forbid_word,weapon,Forbidden
+,trusted_domain,global-corp.com,Trusted domain
+,trusted_domain,hr.global-corp.com,Trusted domain
+,trusted_domain,finance.global-corp.com,Trusted domain
+,trusted_domain,it.global-corp.com,Trusted domain
+,trusted_domain,mail.global-corp.com,Trusted domain
+,trusted_domain,workspace.global-corp.com,Trusted domain
+,trusted_domain,security-training.global-corp.com,Trusted domain
+,trusted_domain,pay.global-corp.com,Trusted domain
+,trusted_domain,attendance.global-corp.com,Trusted domain
+,trusted_domain,account.global-corp.com,Trusted domain

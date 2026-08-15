@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Experiment Questionnaire{% endblock %}
+{% block content %}
+<style>
+    .container-survey {max-width: 920px; margin: 30px auto; padding: 0 20px;}
+    .survey-card {border: 1px solid #dde0e5; border-radius: 12px; padding: 32px; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.05); margin-bottom:24px;}
+    .part-title {font-size:18px; color:#1a365d; font-weight:bold; margin:30px 0 16px; padding-bottom:8px; border-bottom:1px solid #eee;}
+    .q-wrap {margin:22px 0;}
+    .q-text {font-weight:500; margin-bottom:10px; display:block; line-height:1.6;}
+    .radio-row {display:flex; flex-wrap:wrap; gap:14px; margin-bottom:8px;}
+    .radio-item {display:flex; align-items:center; gap:6px;}
+    textarea {width:100%; min-height:90px; padding:10px; border:1px solid #ddd; border-radius:6px; font-size:15px;}
+    .submit-btn {padding:12px 30px; background:#165DFF; color:#fff; border:none; border-radius:8px; font-size:16px; cursor:pointer; margin-top:16px;}
+    .tip-notice {color:#666; font-size:14px; margin-bottom:20px; line-height:1.7;}
+    hr {margin:26px 0; border:0; height:1px; background:#eee;}
+</style>
+<div class="container-survey">
+    <div class="survey-card">
+        <h1>Post‑Experiment Experience Questionnaire</h1>
+        <p class="tip-notice">
+            This questionnaire collects your real experience of the phishing email identification training system. All data is only used for graduation thesis research, all answers are anonymous. Please complete this survey after finishing T0 baseline test, L2 training and T1 post-training test.
+            <br>Scale definition: 1=Strongly Disagree | 2=Disagree | 3=Neutral | 4=Agree | 5=Strongly Agree
+        </p>
+        <hr>
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="part-title">Part 1 — General System Experience</div>
+            <div class="q-wrap">
+                <label class="q-text">Q1. The interface of this training system is clear and easy to operate.</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q1" value="1" required>1 Strongly Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q1" value="2" required>2 Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q1" value="3" required>3 Neutral</label>
+                    <label class="radio-item"><input type="radio" name="q1" value="4" required>4 Agree</label>
+                    <label class="radio-item"><input type="radio" name="q1" value="5" required>5 Strongly Agree</label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q2. Marking/reporting/deleting email operations are easy to understand without extra explanation.</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q2" value="1" required>1 Strongly Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q2" value="2" required>2 Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q2" value="3" required>3 Neutral</label>
+                    <label class="radio-item"><input type="radio" name="q2" value="4" required>4 Agree</label>
+                    <label class="radio-item"><input type="radio" name="q2" value="5" required>5 Strongly Agree</label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q3. The training session length is appropriate, neither too short nor too tedious.</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q3" value="1" required>1 Strongly Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q3" value="2" required>2 Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q3" value="3" required>3 Neutral</label>
+                    <label class="radio-item"><input type="radio" name="q3" value="4" required>4 Agree</label>
+                    <label class="radio-item"><input type="radio" name="q3" value="5" required>5 Strongly Agree</label>
+                </div>
+            </div>
+
+            <div class="part-title">Part 2 — Progressive Difficulty Training (Core Research)</div>
+            <div class="q-wrap">
+                <label class="q-text">Q4. Progressive difficulty design (L1→L2→L3) helps me master phishing recognition skills step by step.</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q4" value="1" required>1 Strongly Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q4" value="2" required>2 Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q4" value="3" required>3 Neutral</label>
+                    <label class="radio-item"><input type="radio" name="q4" value="4" required>4 Agree</label>
+                    <label class="radio-item"><input type="radio" name="q4" value="5" required>5 Strongly Agree</label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q5. Multi-level progressive training is better than single fixed difficulty training for spotting subtle phishing features.</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q5" value="1" required>1 Strongly Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q5" value="2" required>2 Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q5" value="3" required>3 Neutral</label>
+                    <label class="radio-item"><input type="radio" name="q5" value="4" required>4 Agree</label>
+                    <label class="radio-item"><input type="radio" name="q5" value="5" required>5 Strongly Agree</label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q6. Which level brings the most obvious improvement of your phishing identification ability?</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q6" value="L1" required>L1 General Training</label>
+                    <label class="radio-item"><input type="radio" name="q6" value="L2" required>L2 Department Training</label>
+                    <label class="radio-item"><input type="radio" name="q6" value="L3" required>L3 Advanced Training</label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q7. Which level do you think is most suitable for regular daily anti-phishing training?</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q7" value="L1" required>L1</label>
+                    <label class="radio-item"><input type="radio" name="q7" value="L2" required>L2</label>
+                    <label class="radio-item"><input type="radio" name="q7" value="L3" required>L3</label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q8. What are the unique advantages of L1, L2 and L3 training respectively?</label>
+                <textarea name="q8" required placeholder="Write your thoughts here..."></textarea>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q9. Is the difficulty jump between levels reasonable? If you feel it is too easy / too hard, please explain.</label>
+                <textarea name="q9" required placeholder="Write your thoughts here..."></textarea>
+            </div>
+
+            <div class="part-title">Part 3 — Department-Specific Customized Training</div>
+            <div class="q-wrap">
+                <label class="q-text">Q10. L2 training emails match real business scenarios of my department (HR/Finance/IT).</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q10" value="1" required>1 Strongly Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q10" value="2" required>2 Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q10" value="3" required>3 Neutral</label>
+                    <label class="radio-item"><input type="radio" name="q10" value="4" required>4 Agree</label>
+                    <label class="radio-item"><input type="radio" name="q10" value="5" required>5 Strongly Agree</label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q11. Department-customized training helps me recognise industry-specific scam tricks faster.</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q11" value="1" required>1 Strongly Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q11" value="2" required>2 Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q11" value="3" required>3 Neutral</label>
+                    <label class="radio-item"><input type="radio" name="q11" value="4" required>4 Agree</label>
+                    <label class="radio-item"><input type="radio" name="q11" value="5" required>5 Strongly Agree</label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q12. Which training interface do you prefer?</label>
+                <div class="radio-row">
+                    <label class="radio-item">
+                        <input type="radio" name="q12" value="l1_basic" required>
+                        L1 simple generic email interface
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="q12" value="l2_simulation" required>
+                        L2 realistic Outlook‑like working‑environment interface
+                    </label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q13. Which training mode do you think brings better anti-phishing improvement?</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q13" value="L1" required>L1 General Unified Training</label>
+                    <label class="radio-item"><input type="radio" name="q13" value="L2" required>L2 Department Custom Training</label>
+                </div>
+            </div>
+
+            <div class="part-title">Part 4 — T0 Baseline & T1 Post-training Test</div>
+            <div class="q-wrap">
+                <label class="q-text">Q14. There is an obvious gap between my T0 baseline score and T1 post-training score after training.</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q14" value="1" required>1 Strongly Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q14" value="2" required>2 Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q14" value="3" required>3 Neutral</label>
+                    <label class="radio-item"><input type="radio" name="q14" value="4" required>4 Agree</label>
+                    <label class="radio-item"><input type="radio" name="q14" value="5" required>5 Strongly Agree</label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q15. T0 and T1 tests can truly reflect my real phishing identification ability.</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q15" value="1" required>1 Strongly Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q15" value="2" required>2 Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q15" value="3" required>3 Neutral</label>
+                    <label class="radio-item"><input type="radio" name="q15" value="4" required>4 Agree</label>
+                    <label class="radio-item"><input type="radio" name="q15" value="5" required>5 Strongly Agree</label>
+                </div>
+            </div>
+
+            <div class="part-title">Part 5 — System Optimization Suggestions</div>
+            <div class="q-wrap">
+                <label class="q-text">Q16. Which module needs priority optimization?</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q16" value="email_design" required>Email & phishing scenario design</label>
+                    <label class="radio-item"><input type="radio" name="q16" value="score_rule" required>Scoring calculation rules</label>
+                    <label class="radio-item"><input type="radio" name="q16" value="ui_operation" required>Page & operation experience</label>
+                    <label class="radio-item"><input type="radio" name="q16" value="difficulty_set" required>Training difficulty setting</label>
+                    <label class="radio-item"><input type="radio" name="q16" value="other" required>Other</label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q17. What new phishing email types or business scenarios do you hope to add into training library?</label>
+                <textarea name="q17" required placeholder="Write your thoughts here..."></textarea>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q18. Any unreasonable rules about scoring, level unlock, test process that you want to adjust?</label>
+                <textarea name="q18" required placeholder="Write your thoughts here..."></textarea>
+            </div>
+
+            <div class="part-title">Part 6 — Overall Evaluation</div>
+            <div class="q-wrap">
+                <label class="q-text">Q19. I am willing to reuse this training system if my company arranges regular anti-phishing training.</label>
+                <div class="radio-row">
+                    <label class="radio-item"><input type="radio" name="q19" value="1" required>1 Strongly Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q19" value="2" required>2 Disagree</label>
+                    <label class="radio-item"><input type="radio" name="q19" value="3" required>3 Neutral</label>
+                    <label class="radio-item"><input type="radio" name="q19" value="4" required>4 Agree</label>
+                    <label class="radio-item"><input type="radio" name="q19" value="5" required>5 Strongly Agree</label>
+                </div>
+            </div>
+            <div class="q-wrap">
+                <label class="q-text">Q20. Any other comments, feelings or suggestions about this experiment system (optional, can leave blank)</label>
+                <textarea name="q20" placeholder="Write your thoughts here..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit All Answers</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

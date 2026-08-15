@@ -87,12 +87,10 @@ hr{
     line-height:1.8;
 }
 </style>
-
 <div class="wrap">
     <h1>Enterprise Phishing Simulation Training Platform</h1>
     <p class="subtitle">Gamified anti‑phishing test for HR, Finance and IT departments</p>
     <hr>
-
     {% if not user.is_authenticated %}
     <div class="button-row">
         <a href="{% url 'register' %}" class="btn-blue">Register New Trainee Account</a>
@@ -100,20 +98,18 @@ hr{
     </div>
     {% else %}
     <div class="button-row">
-        <!-- Level1：始终开放，可以重复进行 -->
-        <a href="{% url 'pretest_start' %}" class="btn-blue">Start Level 1 Basic Test</a>
-
+        <!-- Level1: Always open and repeatable -->
+        <a href="{% url 'pretest_start' %}" class="btn-blue">Start Level 1 Basic Training</a>
         {% if has_pretest %}
-            <!-- 已经完成至少一次L1，解锁L2 -->
+            <!-- At least one L1 has been completed and L2 has been unlocked -->
             <a href="{% url 'train_l2' %}" class="btn-blue">Enter Level 2 Intermediate Training</a>
         {% else %}
-            <!-- 未完成L1，L2锁定置灰 -->
+            <!-- If L1 and L2 are not completed, lock and gray them -->
             <button class="btn-disabled" disabled>
                 Level 2 Intermediate Training Locked<br>
                 Complete Level1 to unlock L2
             </button>
         {% endif %}
-
         {% if can_l3 %}
             <a href="{% url 'level3_editor' %}" class="btn-blue">Create Department Phishing Email(L3)</a>
         {% else %}
@@ -122,20 +118,19 @@ hr{
                 Current L2 Total {{ l2_total }} / 30 Points
             </button>
         {% endif %}
-
         <a href="{% url 'profile' %}" class="btn-grey">Personal Center</a>
     </div>
-
     {% if not has_pretest %}
         <p class="tip-text">⚠️ Please finish Level 1 Basic Test first to unlock Level 2 training content.</p>
     {% endif %}
-
     {% endif %}
-
     <div class="desc-text">
         <p>This platform provides role‑isolated phishing simulation scenarios. Each employee can access training emails corresponding to their department: Human Resources, Finance, IT.</p>
-        <p>Workflow：Repeatable Level1 Basic Test → Level2 Intermediate Training → Accumulate 30 points in Level2 to unlock advanced Level3 email creation function.</p>
+        <p><strong>Workflow:</strong> Complete one‑time T0 Baseline Test in Personal Center → Repeatable Level1 Basic Test (finish L1 to unlock L2).
+        Level 2 rules: Correctly identify emails +6 points per mail, misjudge ‑4 points, click phishing link ‑6 points per mail, click right link +4 points per mail; max 30 points per session, accumulate total points to unlock L3.
+        → Level3 Email Creation: Four‑dimension automatic scoring (0‑100): role‑matching(0‑30), social‑engineering(0‑30), camouflage(0‑25), flaw‑hiding(0‑15). High‑score drafts (≥70, Good/Excellent) will be added to L2 training pool for other users.
+        → Complete one‑time T1 Post‑Training Test → Fill post‑experiment questionnaire.</p>
+        <p class="text‑secondary small">Note: Focus on the content and urls. T0 baseline test, T1 post‑training test and post‑experiment questionnaire can only be submitted once per user. If you have any questions, please contact the us: 3060584G@student.gla.ac.uk.</p>
     </div>
 </div>
-
 {% endblock %}

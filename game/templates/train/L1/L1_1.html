@@ -1,17 +1,18 @@
-<!-- 发件人头部 -->
+<!-- Sender header -->
 <div class="mail-header">
     <div class="avatar-sender">{{ template.email_title|slice:":1" }}</div>
     <div class="sender-info">
         <div class="name">{{ template.email_title }}</div>
-        <div class="mail-address">{{ template.fake_link }}</div>
+        <div class="mail-address">official-company@corp-domain.com</div>
         <div class="user-email">Sent to: {{ request.user.email }}</div>
     </div>
 </div>
-<!-- 邮件标题 -->
+<!-- Email title -->
 <div class="mail-title">{{ template.email_title }}</div>
-<!-- 邮件正文+链接 -->
+<!-- Email body + links -->
 <div class="mail-body">
     {{ template.email_content|linebreaks }}
+    {% if template.fake_link %}
     <div class="link-box">
         <div style="font-weight:500;">Shared Documents / Secure Links</div>
         <p>Click the link below for details</p>
@@ -23,4 +24,5 @@
         <br>
         <button class="open-btn" data-tip="{{ template.fake_link }}">Open Link</button>
     </div>
+    {% endif %}
 </div>

@@ -40,20 +40,16 @@ nav {
 <body>
 {% block top_nav %}
 <nav>
-    <!-- 左侧固定导航 -->
+    <!-- Fixed navigation on the left -->
     <div class="nav-left">
     {% if user.is_authenticated %}
         <a href="{% url 'home' %}">Home</a>
-        <!-- 仅管理员可见：用户自制邮件审核入口 -->
-        {% if user.role == "admin" %}
-            <a href="{% url 'admin_email_audit_list' %}">Email Audit</a>
-        {% endif %}
     {% else %}
         <a href="{% url 'home' %}">Home</a>
         <a href="{% url 'register' %}">Registration</a>
     {% endif %}
     </div>
-    <!-- 右侧：注册、登录、用户信息、个人中心、登出 -->
+    <!-- Right side: Registration, Login, User Information, Personal Center, Logout -->
     <div class="nav-right">
     {% if user.is_authenticated %}
         <span>Welcome, {{ user.username }} | Role: {{ user.get_role_display }}</span>
@@ -65,6 +61,7 @@ nav {
     </div>
 </nav>
 {% endblock %}
+
 <div class="container">
 {% block content %}{% endblock %}
 </div>
