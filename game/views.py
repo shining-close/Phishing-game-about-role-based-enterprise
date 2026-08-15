@@ -588,6 +588,7 @@ def train_report(request, session_id):
 
 # ====================== L3 email creation and submission ======================
 # Stop word list, filtering meaningless function words when splitting long keywords
+# Stop word list, filtering meaningless function words when splitting long keywords
 _STOP_WORDS = {
     "the", "a", "an", "of", "to", "in", "for", "on", "at", "and", "or",
     "is", "are", "was", "were", "be", "by", "with", "from", "within",
@@ -595,14 +596,12 @@ _STOP_WORDS = {
     "this", "that", "it", "its", "as", "into", "via", "per", "can",
 }
 
-
-_RULE_MAP_CACHE = None
-
+# 注释全局缓存变量，删除缓存逻辑
+# _RULE_MAP_CACHE = None
 def build_rule_map():
-    global _RULE_MAP_CACHE
-    
-    if _RULE_MAP_CACHE is not None:
-        return _RULE_MAP_CACHE
+    # global _RULE_MAP_CACHE
+    # if _RULE_MAP_CACHE is not None:
+    #     return _RULE_MAP_CACHE
     all_rules = ConfigRuleModel.objects\
         .exclude(content__isnull=True)\
         .exclude(content="")\
@@ -616,8 +615,7 @@ def build_rule_map():
         if rt not in rule_map:
             rule_map[rt] = []
         rule_map[rt].append(word)
-    
-    _RULE_MAP_CACHE = rule_map
+    # _RULE_MAP_CACHE = rule_map
     return rule_map
 
 
@@ -673,23 +671,23 @@ def level3_editor(request):
     if not user.unlock_l3:
         messages.error(request, f"You need at least 30 L2 points to unlock Level3 creation, current: {user.l2_total_points}")
         return redirect("home")
-
     rule_map = build_rule_map()
-    role = user.role
+    role = user.role.strip()
     dept_legit_key = f"dept_{role}_legit"
     dept_phish_key = f"dept_{role}_phish"
-    dept_legit_words = rule_map.get(dept_legit_key, [])
-    dept_phish_words = rule_map.get(dept_phish_key, [])
+   
+    dept_legit_words = rule_map.get(dept_legit_key, []) or []
+    dept_phish_words = rule_map.get(dept_phish_key, []) or []
     se_groups = {
-        "authority": rule_map.get("se_authority", []),
-        "urgent": rule_map.get("se_urgent", []),
-        "fear_loss": rule_map.get("se_fear", []),
-        "benefit": rule_map.get("se_benefit", []),
+        "authority": rule_map.get("se_authority", []) or [],
+        "urgent": rule_map.get("se_urgent", []) or [],
+        "fear_loss": rule_map.get("se_fear", []) or [],
+        "benefit": rule_map.get("se_benefit", []) or [],
     }
-    flaw_words = rule_map.get("flaw_word", [])
-    forbid_words = rule_map.get("forbid_word", [])
-    fake_sender_keywords = rule_map.get("regex_sender", [])
-    fake_domain_keywords = rule_map.get("regex_domain", [])
+    flaw_words = rule_map.get("flaw_word", []) or []
+    forbid_words = rule_map.get("forbid_word", []) or []
+    fake_sender_keywords = rule_map.get("regex_sender", []) or []
+    fake_domain_keywords = rule_map.get("regex_domain", []) or []
     return render(request, "train/l3/editor.html", {
         "user_dept": user.role,
         "dept_legit_words": dept_legit_words,
@@ -700,6 +698,7 @@ def level3_editor(request):
         "fake_sender_keywords": fake_sender_keywords,
         "fake_domain_keywords": fake_domain_keywords,
     })
+
 
 # L3 Submit to create the email interface
 @login_required

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
-/* 复刻登录页圆润柔和风格，全局覆盖本页面 */
+/* Replicate the smooth and soft style of the login page, covering the entire page */
 .l3-wrap{
     min-height: 90vh;
     display:flex;
@@ -135,7 +135,7 @@
             <!-- 部门正规业务词 -->
             <div class="keyword-block">
                 <strong>{{ user_dept|upper }} Normal Business Keywords (Dept Matching Score):</strong><br>
-                {% if dept_legit_words %}
+                {% if dept_legit_words|default:'' %}
                     {% for kw in dept_legit_words %}
                         {{ kw }}{% if not forloop.last %}, {% endif %}
                     {% endfor %}
@@ -146,7 +146,7 @@
             <!-- 部门专属钓鱼诱导词 -->
             <div class="keyword-block">
                 <strong>{{ user_dept|upper }} Phishing Induce Keywords (Social Engineering Score):</strong><br>
-                {% if dept_phish_words %}
+                {% if dept_phish_words|default:'' %}
                     {% for kw in dept_phish_words %}
                         {{ kw }}{% if not forloop.last %}, {% endif %}
                     {% endfor %}
@@ -158,31 +158,31 @@
             <div class="keyword-block">
                 <strong>General Social Engineering Lure Keywords:</strong><br>
                 Authority:
-                {% if se_groups.authority %}
+                {% if se_groups.authority|default:'' %}
                     {% for w in se_groups.authority %}{{ w }} {% endfor %}
                 {% else %}—{% endif %}<br>
                 Urgent:
-                {% if se_groups.urgent %}
+                {% if se_groups.urgent|default:'' %}
                     {% for w in se_groups.urgent %}{{ w }} {% endfor %}
                 {% else %}—{% endif %}<br>
                 Fear of loss:
-                {% if se_groups.fear_loss %}
+                {% if se_groups.fear_loss|default:'' %}
                     {% for w in se_groups.fear_loss %}{{ w }} {% endfor %}
                 {% else %}—{% endif %}<br>
                 Benefit:
-                {% if se_groups.benefit %}
+                {% if se_groups.benefit|default:'' %}
                     {% for w in se_groups.benefit %}{{ w }} {% endfor %}
                 {% else %}—{% endif %}
                 <div style="margin-top:8px;color:#165DFF;font-size:13px;">
                     *Your department exclusive phishing words count as the 5th lure category
                 </div>
             </div>
-            <!-- 【仅此处修复，其余全部保留原样】伪装提示文字：从数据库动态读取；打分逻辑仍然后端读取数据库，前端仅展示，不参与计算 -->
+            <!-- 伪装提示文字 -->
             <div class="keyword-block">
                 <strong>Qualified Camouflage Content (get full 25pts):</strong><br>
                 <div>
                     <span>Fake sender candidates:</span>
-                    {% if fake_sender_keywords %}
+                    {% if fake_sender_keywords|default:'' %}
                         {% for kw in fake_sender_keywords %}
                             <code>{{ kw }}</code>{% if not forloop.last %} / {% endif %}
                         {% endfor %}
@@ -193,7 +193,7 @@
                 <br>
                 <div>
                     <span>Fake domain keywords:</span>
-                    {% if fake_domain_keywords %}
+                    {% if fake_domain_keywords|default:'' %}
                         {% for kw in fake_domain_keywords %}
                             <code>{{ kw }}</code>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
@@ -202,7 +202,6 @@
                     {% endif %}
                 </div>
                 <br>
-                <!-- 新增实验说明文本，给受试者看，也可以截图放进论文 -->
                 <div style="margin-top:8px;font-size:0.9em;color:#444;">
                 <strong>Design note:</strong>
                 In phishing scenarios, attackers spoof sender addresses to impersonate trusted internal departments (HR / Finance / IT),
@@ -213,7 +212,7 @@
             <!-- 低级扣分词动态渲染 -->
             <div class="keyword-block">
                 <strong>Low-level Flaw Words (will deduct points):</strong><br>
-                {% if flaw_words %}
+                {% if flaw_words|default:'' %}
                     {% for w in flaw_words %}
                         {{ w }}{% if not forloop.last %}, {% endif %}
                     {% endfor %}
@@ -249,7 +248,7 @@
                 <label class="l3-label">Email Type</label>
                 <select class="l3-select" name="email_label">
                     <option value="phish">Phishing Email</option>
-                    <option value="legit">Legitimate Email</option>
+                    <option value="legitimate">Legitimate Email</option>
                 </select>
             </div>
             <div class="l3-form-item">
@@ -267,7 +266,6 @@
     <div class="l3-card-block">
         <div class="l3-card-header">📝 Email Content Paragraphs</div>
         <div class="l3-card-body">
-            <!-- 优化：移除硬编码部门关键词，统一引导查看上方关键词面板 -->
             <div class="l3-alert-tip">
                 Reference the keyword table above to add official business words and phishing induce content to raise your total score.
             </div>
