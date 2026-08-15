@@ -595,9 +595,18 @@ _STOP_WORDS = {
     "this", "that", "it", "its", "as", "into", "via", "per", "can",
 }
 
-# Global public functions: Unified reading, cleaning, and aggregation rules
+
+_RULE_MAP_CACHE = None
+
 def build_rule_map():
-    all_rules = ConfigRuleModel.objects.all()
+    global _RULE_MAP_CACHE
+    
+    if _RULE_MAP_CACHE is not None:
+        return _RULE_MAP_CACHE
+    all_rules = ConfigRuleModel.objects\
+        .exclude(content__isnull=True)\
+        .exclude(content="")\
+        .only("rule_type", "content")
     rule_map = {}
     for item in all_rules:
         rt = item.rule_type.strip()
@@ -607,6 +616,8 @@ def build_rule_map():
         if rt not in rule_map:
             rule_map[rt] = []
         rule_map[rt].append(word)
+    
+    _RULE_MAP_CACHE = rule_map
     return rule_map
 
 
