@@ -688,7 +688,7 @@ def level3_editor(request):
     forbid_words = rule_map.get("forbid_word", []) or []
     fake_sender_keywords = rule_map.get("regex_sender", []) or []
     fake_domain_keywords = rule_map.get("regex_domain", []) or []
-    return render(request, "train/l3/editor.html", {
+    return render(request, "train/L3/editor.html", {
         "user_dept": user.role,
         "dept_legit_words": dept_legit_words,
         "dept_phish_words": dept_phish_words,
