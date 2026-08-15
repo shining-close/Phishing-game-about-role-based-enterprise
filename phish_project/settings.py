@@ -8,21 +8,20 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os
 from pathlib import Path
-import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-+qhjck*l0zku0qt1=o1mey&rlohr(6ppv^kg55722efb))d5z9")
 
-# Environment distinction: turn off DEBUG for production, turn on for local development
-if "RENDER" in os.environ:
+
+if "PYTHONANYWHERE_DOMAIN" in os.environ:
+   
     DEBUG = False
-    ALLOWED_HOSTS = [os.environ.get("RENDER_EXTERNAL_HOSTNAME")]
+    ALLOWED_HOSTS = [os.environ.get("PYTHONANYWHERE_DOMAIN")]
 else:
+
     DEBUG = True
     ALLOWED_HOSTS = []
 
@@ -34,18 +33,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # New apps
+
     'game',
     'crispy_forms',
     "import_export",
 ]
 
-# Form script library for Django
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # Static files middleware (required for Render)
+
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -60,7 +58,7 @@ ROOT_URLCONF = "phish_project.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"], # Newly added line to specify the templates directory
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -74,21 +72,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "phish_project.wsgi.application"
 
-# Render: PostgreSQL，Local: MySQL
-if "RENDER" in os.environ:
-    DATABASES = {
-        "default": dj_database_url.config(
-            conn_max_age=600,
-            ssl_require=True
-        )
-    }
-else:
-    # Mysql
+if "PYTHONANYWHERE_DOMAIN" in os.environ:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'phish_db',
-            'USER': 'root',        # MySQL account
+            'USER': 'admin',
+            'PASSWORD': 'AEAEAEEOO',
+            
+            'HOST': 'LeavesFallFallFall.mysql.pythonanywhere-services.com',
+            'PORT': '3306',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'phish_db',
+            'USER': 'root',
             'PASSWORD': 'AEAEAEEOO',
             'HOST': '127.0.0.1',
             'PORT': '3306',
@@ -96,7 +97,6 @@ else:
     }
 
 # Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -113,20 +113,17 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# Static file configuration is dedicated to Render
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Define the custom user model
 AUTH_USER_MODEL = 'game.UserModel'
 
-# login and redirect URLs for authentication
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/inbox/'
+

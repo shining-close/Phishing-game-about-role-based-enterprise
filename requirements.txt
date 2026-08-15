@@ -11,8 +11,6 @@ setuptools==83.0.0
 shortuuid==1.0.1
 packaging==26.0
 wheel==0.47.0
-# for render deployment
 gunicorn
 whitenoise
-dj-database-url
-psycopg2-binary
+mysqlclient
