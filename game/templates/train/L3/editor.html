@@ -233,6 +233,7 @@
                 <input class="l3-input" type="text" name="sender" required
                 {% if user_dept == "hr" %}placeholder="HR@fakecompany.com / Admin‑hr@fake.org"
                 {% elif user_dept == "finance" %}placeholder="Finance@corp‑fake.top / payment‑admin@fake.com"
+                {% elif user_dept == "company" %}placeholder="Corporate‑Office@fake‑corp.com / ceo‑office@fakecompany.org"
                 {% else %}placeholder="IT‑System@fake‑org.com / tech‑support@fake.org"{% endif %}>
                 <div class="l3-tip-text">Spoof official‑looking sender to increase credibility</div>
             </div>
@@ -241,6 +242,7 @@
                 <input class="l3-input" type="text" name="subject" required
                 {% if user_dept == "hr" %}placeholder="[URGENT] Salary adjustment & contract confirmation"
                 {% elif user_dept == "finance" %}placeholder="Expense reimbursement pending, account will be frozen soon"
+                {% elif user_dept == "company" %}placeholder="[URGENT] Corporate board notice & company‑wide policy update"
                 {% else %}placeholder="Account security alert: your access will expire"{% endif %}>
                 <div class="l3-tip-text">Use urgent / reward / risk words to improve lure effect</div>
             </div>
@@ -274,6 +276,7 @@
                 <textarea class="l3-textarea" name="content_1"
                 {% if user_dept == "hr" %}placeholder="Dear colleague, our salary system has been updated. Please click link to verify your bank info or salary will be delayed."
                 {% elif user_dept == "finance" %}placeholder="You have one pending reimbursement record. Please confirm before end‑of‑month deadline."
+                {% elif user_dept == "company" %}placeholder="Notice from corporate office, new company policy has been released, please complete corporate identity verification."
                 {% else %}placeholder="Suspicious login detected. Please finish identity verification to keep your account active."{% endif %}></textarea>
             </div>
             <div class="l3-form-item">
@@ -281,6 +284,7 @@
                 <textarea class="l3-textarea" name="content_2"
                 {% if user_dept == "hr" %}placeholder="New performance bonus policy is released, click link to view detailed rules."
                 {% elif user_dept == "finance" %}placeholder="Failure to confirm will cause automatic rejection of your reimbursement application."
+                {% elif user_dept == "company" %}placeholder="Failure to acknowledge corporate notice may affect your internal system access permissions."
                 {% else %}placeholder="System security policy updated, secondary verification is mandatory for internal system access."{% endif %}></textarea>
             </div>
             <div class="l3-form-item">
@@ -304,6 +308,7 @@
                     <input class="l3-input" name="link_text_1"
                     {% if user_dept == "hr" %}placeholder="Check my salary details"
                     {% elif user_dept == "finance" %}placeholder="Confirm my reimbursement"
+                    {% elif user_dept == "company" %}placeholder="View corporate official notice"
                     {% else %}placeholder="Complete account verification"{% endif %}>
                 </div>
                 <div>
@@ -367,3 +372,4 @@
 </div>
 </div>
 {% endblock %}
+

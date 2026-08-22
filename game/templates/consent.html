@@ -8,34 +8,40 @@
     <p><strong>Researcher:</strong> 3060584G@student.gla.ac.uk</p>
     <p><strong>Ethics Contact:</strong> Prof Matthew Chalmers, SoCS Ethics Chair</p>
     <h4>1. Study Aim</h4>
-    <p>This research aims to evaluate a two-way anti-phishing training platform. The system supports standard phishing identification training and a creative module where participants design deceptive phishing emails. We measure users’ ability to recognise social engineering attack techniques through behavioural logs.</p>
+    <p>This research aims to evaluate a two‑way anti‑phishing training platform. The system supports standard phishing identification training and a creative module where participants design deceptive phishing emails. We measure users’ ability to recognise social engineering attack techniques through behavioural logs.</p>
     <h4>2. What you will do during the study</h4>
     <p>After registration, you first need to complete the **T0 baseline test** from your profile page (this test can only be completed once). Then you will complete staged training (L1 basic phase, L2 role‑based simulation phase, unlockable L3 adversarial creation phase). After finishing all training tasks, you will take the **T1 post‑training test**, which can also only be taken once. The whole procedure will take approximately 12‑15 minutes.</p>
     <p>The system records your behaviours: mark emails as legitimate/suspicious, delete emails, report phishing emails, and click fake hyperlinks inside simulated emails.</p>
     <h4>3. Data collected & Anonymisation Rule</h4>
-    <p>You will create a self-defined username solely for system login purposes, and this login name will not be used in any research dataset. Upon successful registration, the system will automatically assign you a unique random anonymous participant ID (a string of random characters) for all research data records. No real name, phone, email or other personally identifiable information will be collected, stored or linked to your experimental behavioural logs at any stage.</p>
-    <p>The mapping between your login username and random anonymous ID will be permanently erased once all data collection for this research finishes. All experimental data will be stored on a password-protected local device and fully deleted within 12 months after dissertation submission.</p>
+    <p>You will provide your real name for internal study traceability purpose only. Your login username is for system access only and will not appear in research datasets. Upon successful registration, the system will automatically assign you a unique 4‑digit random anonymous participant ID. <strong>All experimental behavioural data, questionnaire results and training logs will be labelled only with this anonymous ID. Your real name will NOT be included in any research dataset and will be stored separately as an internal mapping table for trace‑back.</strong></p>
+    <p>The mapping record linking your real name and random anonymous ID will be permanently erased once all data collection for this research finishes. All experimental data will be stored on a password‑protected local device and fully deleted within 12 months after dissertation submission.</p>
     <h4>4. Voluntary Participation & Right to Withdraw</h4>
     <p>Your participation is fully voluntary. You may close the browser and withdraw at any time without penalty. All your recorded behavioural data will be permanently deleted upon your request. If you exit before finishing training, you cannot receive full debrief information about the experiment’s purpose.</p>
     <p>This is an evaluation of the training system, not a test of your personal ability.</p>
     <h4>5. Confidentiality & GDPR Compliance</h4>
-    <p>No identifiable personal data will be collected or shared publicly. Only aggregated anonymised results labelled by random anonymous ID may be used in the dissertation, with no way to trace back to any single participant.</p>
+    <p>Identifiable personal information (real‑name) is stored separately and will not be shared publicly. Only aggregated anonymised results labelled by random anonymous ID may be used in the dissertation. The real‑name mapping table will be destroyed after data collection completes.</p>
     <hr>
     <h3>Informed Consent Confirmation</h3>
     <form method="POST">
         {% csrf_token %}
+        
+        <div style="margin:15px 0;">
+            <label for="real_name">Your Real Name (for internal trace‑back only):</label>
+            <input id="real_name" type="text" name="real_name" required
+                   style="width:100%;padding:8px;margin‑top:6px;box‑sizing:border‑box;"
+                   placeholder="Please enter your full real name">
+        </div>
+
         <div style="margin:15px 0;">
             <label>
                 <input type="checkbox" name="agree" value="on" required>
-                I have fully read and understood all information above. I voluntarily agree to take part in this research study and permit anonymised recording of my training behaviours linked only to my auto-generated random anonymous ID. I understand I can withdraw at any stage and request full deletion of my behavioural records.
+                I have fully read and understood all information above. I voluntarily agree to take part in this research study and permit anonymised recording of my training behaviours linked only to my auto‑generated random anonymous ID. I understand I can withdraw at any stage and request full deletion of my behavioural records.
             </label>
         </div>
-        <button type="submit" style="padding:10px 24px;background:#0066cc;color:#fff;border:none;border-radius:4px;">I Agree & Proceed to Register</button>
+        <button type="submit" style="padding:10px 24px;background:#0066cc;color:#fff;border:none;border‑radius:4px;">I Agree & Proceed to Register</button>
     </form>
-    <div style="margin-top:20px;color:#999;font-size:14px;">
+    <div style="margin‑top:20px;color:#999;font‑size:14px;">
         If you disagree, please close this page — you cannot access the training system.
     </div>
 </div>
 {% endblock %}
-
-

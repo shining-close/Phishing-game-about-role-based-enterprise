@@ -5,6 +5,7 @@ import random
 
 
 class UserConsentRecord(models.Model):
+    real_name = models.CharField(max_length=128, blank=True, null=True, verbose_name="Participant Real Name")
     participant_anon_id = models.CharField(max_length=64, verbose_name="Anonymous Participant ID")
     consent_datetime = models.DateTimeField(auto_now_add=True, verbose_name="Consent Submit Time")
     class Meta:
@@ -21,6 +22,7 @@ class UserModel(AbstractUser):
         ('hr', 'Human Resources'),
         ('finance', 'Finance Department'),
         ('it', 'IT Department'),
+        ('company', 'Company Corporate'),
         ('admin', 'Administrator'),
     )
     role = models.CharField(
@@ -151,6 +153,7 @@ class EmailTemplateModel(models.Model):
         ('hr', 'HR'),
         ('finance', 'Finance'),
         ('it', 'IT'),
+        ('company','Company Corporate'),
     )
     TEMPLATE_SERIAL_CHOICES = (
         (1, "Template No.1"),
@@ -199,6 +202,7 @@ class Level2EmailTemplateModel(models.Model):
         ('hr', 'HR'),
         ('finance', 'Finance'),
         ('it', 'IT'),
+        ('company','Company Corporate'),
     )
     TRAIN_DIFFICULTY = (
         (2, "Level 2 Intermediate"),
@@ -366,6 +370,9 @@ class ConfigRuleModel(models.Model):
         ("dept_finance_phish", "Finance Phishing Inducement Keywords"),
         ("dept_it_legit", "IT Legitimate Business Keywords"),
         ("dept_it_phish", "IT Phishing Inducement Keywords"),
+        ("dept_company_legit", "Company‑Corporate Legitimate Business Keywords"),
+        ("dept_company_phish", "Company‑Corporate Phishing Inducement Keywords"),
+
         ("se_authority", "Social Engineering - Authority"),
         ("se_urgent", "Social Engineering - Urgent"),
         ("se_fear", "Social Engineering - Loss Threat"),

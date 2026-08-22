@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django import forms
+from django.contrib.auth.admin import UserAdmin
 # Import and export
 from import_export.admin import ImportExportModelAdmin
 from .models import (
@@ -7,22 +8,40 @@ from .models import (
     AdminModel, RoleChangeApply,ConfigRuleModel,
     PreTestRecord, TrainSession, UserMailAction, UserConsentRecord, ExperimentSurvey
 )
+
 # Informed consent record: Remove the username and replace it with an anonymous ID
 @admin.register(UserConsentRecord)
 class UserConsentRecordAdmin(ImportExportModelAdmin):
-    list_display = ("id", "participant_anon_id", "consent_datetime")
+    list_display = ("id","real_name", "participant_anon_id", "consent_datetime")
     readonly_fields = ("consent_datetime",)
     search_fields = ["participant_anon_id"]
 
+
 # User management: Display anonymous participant ID
 @admin.register(UserModel)
-class UserModelAdmin(ImportExportModelAdmin):
+class UserModelAdmin(UserAdmin, ImportExportModelAdmin):
     list_display = (
         "username", "anon_participant_id", "email", "role",
         "pre_test_score", "post_test_score",
         "l2_total_points", "unlock_l3", "has_consented"
     )
     search_fields = ["username", "anon_participant_id"]
+
+    fieldsets = UserAdmin.fieldsets + (
+        ("Experiment Participant Info", {
+            "fields": ("anon_participant_id", "role",
+                       "pre_test_score", "post_test_score",
+                       "l2_total_points", "unlock_l3", "has_consented")
+        }),
+    )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ("Experiment Participant Info", {
+            "fields": ("anon_participant_id", "role",
+                       "pre_test_score", "post_test_score",
+                       "l2_total_points", "unlock_l3", "has_consented")
+        }),
+    )
+
 
 # Add display, filtering and editing of test_difficulty to EmailTemplateModel
 @admin.register(EmailTemplateModel)

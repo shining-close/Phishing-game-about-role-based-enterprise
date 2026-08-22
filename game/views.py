@@ -16,6 +16,7 @@ from django.utils import timezone
 from django.db.models import Max, OuterRef, Subquery, Q
 import json
 import re
+from functools import wraps
 
 # Difine a decorator to restrict access to views based on user role
 def role_permit(allow_role):
@@ -43,45 +44,56 @@ def consent_required(view_func):
             return redirect("consent_page")
     return _wrapped_view
 
+
 def consent_page(request):
     # Agreed to jump directly to registration
     if request.session.get("has_consented"):
         return redirect("register")
     if request.method == "POST":
         agree = request.POST.get("agree")
+        real_name = request.POST.get("real_name", "").strip()
+
         # If the checkbox is not ticked, return an error message
         if agree != "on":
             messages.error(request, "Please tick the consent checkbox to continue.")
             return render(request, "consent.html")
-        
+
+        if not real_name:
+            messages.error(request, "Please fill in your real name for research record.")
+            return render(request, "consent.html")
+
         request.session["has_consented"] = True
+        request.session["has_consented_real_name"] = real_name  # 存入session
         return redirect("register")
     return render(request, "consent.html")
+
 
 def debrief_view(request):
     if not request.user.is_authenticated:
         messages.warning(request, "Please log in first.")
         return redirect("login")
     user = request.user
-
-    # Judgment: Whether the post-experiment questionnaire has been submitted ExperimentSurvey
+    # Judgment: Whether the post‑experiment questionnaire has been submitted ExperimentSurvey
     survey_finished = ExperimentSurvey.objects.filter(user=user).exists()
-
     if not survey_finished:
         messages.error(request, "Debrief page is available only after you complete the post‑experiment questionnaire.")
         return redirect("profile")
-
     return render(request, "debrief.html")
+
 
 
 # ====================== Log in, register and log out） ======================
 def register_view(request):
-    # No informed‑consent tag, forcing consent popup.
-    if not request.session.get("has_consented"):
-        return redirect("consent_page")
-        
+   
+    if not request.user.is_authenticated:
+        has_agree = request.session.get("has_consented")
+        has_realname = request.session.get("has_consented_real_name")
+        if not (has_agree and has_realname):
+            return redirect("consent_page")
+
     if request.user.is_authenticated:
         return redirect("home")
+    
     register_form = RegisterForm()
     if request.method == "POST":
         register_form = RegisterForm(request.POST)
@@ -90,16 +102,18 @@ def register_view(request):
             new_user.has_consented = True
             new_user.save()
             
-            # Use the automatically generated anonymous ID
             UserConsentRecord.objects.create(
-                participant_anon_id = new_user.anon_participant_id
+                participant_anon_id = new_user.anon_participant_id,
+                real_name = request.session.get("has_consented_real_name")
             )
             
             login(request, new_user)
-            # Clear the consent session flag to prevent reuse
+            if "has_consented_real_name" in request.session:
+                del request.session["has_consented_real_name"]
             del request.session["has_consented"]
             return redirect("home")
     return render(request, "register.html", {"form": register_form})
+
 
 
 def login_view(request):
