@@ -138,8 +138,8 @@ class TrainSessionAdmin(ImportExportModelAdmin):
     
 @admin.register(UserMailAction)
 class UserMailActionAdmin(ImportExportModelAdmin):
-    list_display = ("session", "mail", "action_type", "action_time")
-    list_filter = ("action_type", "session__difficulty")
+    list_display = ("id","session", "mail", "action_type", "action_time", "is_correct", "score","confidence")
+    list_filter = ("action_type", "session__difficulty", "is_correct")
     search_fields = ("session__user__username", "session__user__anon_participant_id", "mail__subject")
 
 @admin.register(AdminModel)

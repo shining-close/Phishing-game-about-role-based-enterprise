@@ -126,7 +126,7 @@ class UserMailAction(models.Model):
         ("open_mail", "Open mail"),
         ("mark_suspicious", "Mark as suspicious phishing"),
         ("delete_mail", "Delete mail"),
-        ("click_link", "Click link inside mail"),  # High-risk penalty
+        ("click_link", "Click link inside mail"),
         ("report_phish", "Report phishing"),
         ("mark_legit", "Mark as legitimate mail"),
     ]
@@ -139,9 +139,12 @@ class UserMailAction(models.Model):
         null=True, blank=True,
         verbose_name="Judgment Confidence(1~5)"
     )
+    is_correct = models.BooleanField(null=True, blank=True, verbose_name="Judgment Correct or Not")
+    score = models.IntegerField(null=True, blank=True, verbose_name="Single‑action score(negative=penalty)")
 
     def __str__(self):
-        return f"{self.session.user.username} {self.action_type}"
+        return f"{self.session.user.username} | {self.action_type}"
+
 
 # L1/T0/T1 Email Template Model
 class EmailTemplateModel(models.Model):

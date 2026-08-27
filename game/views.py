@@ -337,6 +337,24 @@ def t1_posttrain_inbox(request):
     })
 
 # ====================== L2 / L3 simulation inbox training ======================
+ACTION_SCORE_MAP = {
+    # phish
+    ("phish", "report_phish"): 6,
+    ("phish", "mark_suspicious"): 6,
+    ("phish", "delete_mail"): 6,
+    ("phish", "click_link"): -6,
+    ("phish", "open_mail"): 0,
+    ("phish", "mark_legit"): -4,
+
+    # legit
+    ("legit", "report_phish"): -4,
+    ("legit", "mark_suspicious"): -4,
+    ("legit", "delete_mail"): 0,
+    ("legit", "open_mail"): 0,
+    ("legit", "click_link"): 2,
+    ("legit", "mark_legit"): 6,
+}
+
 @login_required
 @consent_required
 def train_l2_inbox(request):
@@ -414,22 +432,40 @@ def mail_action_save(request):
         ).exists()
         
         if not existing_action:
+            ground_truth = mail_obj.email_label
+            act = action_type
+
+            if ground_truth == "phish":
+                if act in ["report_phish","mark_suspicious","delete_mail"]:
+                    is_correct_flag = True
+                else:
+                    is_correct_flag = False
+            else: # legit
+                if act in ["report_phish","mark_suspicious"]:
+                    is_correct_flag = False
+                else:
+                    is_correct_flag = True
+
+            single_score = ACTION_SCORE_MAP.get((ground_truth, act), 0)
+
             # Construct creation parameters
             create_kwargs = {
                 "session": session_obj,
                 "mail": mail_obj,
-                "action_type": action_type
+                "action_type": action_type,
+                "is_correct": is_correct_flag,
+                "score": single_score
             }
             # Only T0(4)/T1(5) is stored in the confidence level
             if session_obj.difficulty in (4, 5) and confidence:
                 create_kwargs["confidence"] = int(confidence)
-
             UserMailAction.objects.create(**create_kwargs)
         
         return JsonResponse({"code": 200, "msg": "success"})
     except Exception as e:
-        print("操作保存异常：", str(e))
+        print("data save problems:", str(e))
         return JsonResponse({"code": 500, "msg": str(e)})
+
 
 # To conclude this training, calculate the total score, count the number of correct identifications, and automatically unlock L3
 @login_required
