@@ -1,0 +1,73 @@
+h3 {
+    margin-top: 10px;
+    color: #2c5282;
+}
+.table-full {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    border: 1px solid #000;
+}
+.table-full.table-full.margin-20 {
+    margin: 20px 0;
+}
+.table-full th {
+    background-color: #f5f5f5;
+    border: 1px solid #000;
+    padding: 10px;
+    text-align: left;
+}
+.table-full td {
+    border: 1px solid #000;
+    padding: 10px;
+}
+.table-full th.w300 {
+    width: 300px;
+}
+.table-full th.w220 {
+    width: 220px;
+}
+.table-full th.w180 {
+    width: 180px;
+}
+.tr-blue {
+    background: #e9f2ff;
+    font-weight: bold;
+}
+.box-padding12 th,
+.box-padding12 td {
+    padding: 12px;
+}
+.mt30 {
+    margin-top: 30px;
+}
+.mt25 {
+    margin-top: 25px;
+}
+.pre-line-text {
+    white-space: pre-line;
+}
+.url-tip-wrap {
+    position: relative;
+    display: inline-block;
+    color: #0066cc;
+    text-decoration: underline;
+}
+.real-ur-tip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 26px;
+    left: 0;
+    background: #222;
+    color: #fff;
+    padding: 4px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+    z-index: 99;
+}
+.url-tip-wrap:hover .real-ur-tip {
+    visibility: visible;
+    opacity: 1;
+}
